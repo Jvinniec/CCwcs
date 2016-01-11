@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6E72BBF11C44477B00DC68D3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E72BBF01C44477B00DC68D3 /* main.cpp */; };
+		6E72BBF91C4447BC00DC68D3 /* WscHandler.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 6E72BBF71C4447BC00DC68D3 /* WscHandler.cxx */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +26,8 @@
 /* Begin PBXFileReference section */
 		6E72BBED1C44477B00DC68D3 /* CCwcs */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CCwcs; sourceTree = BUILT_PRODUCTS_DIR; };
 		6E72BBF01C44477B00DC68D3 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		6E72BBF71C4447BC00DC68D3 /* WscHandler.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WscHandler.cxx; sourceTree = "<group>"; };
+		6E72BBF81C4447BC00DC68D3 /* WscHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WscHandler.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +61,8 @@
 			isa = PBXGroup;
 			children = (
 				6E72BBF01C44477B00DC68D3 /* main.cpp */,
+				6E72BBF71C4447BC00DC68D3 /* WscHandler.cxx */,
+				6E72BBF81C4447BC00DC68D3 /* WscHandler.h */,
 			);
 			path = CCwcs;
 			sourceTree = "<group>";
@@ -118,6 +123,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6E72BBF91C4447BC00DC68D3 /* WscHandler.cxx in Sources */,
 				6E72BBF11C44477B00DC68D3 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -207,14 +213,18 @@
 		6E72BBF51C44477B00DC68D3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = /Users/joshcardenzana/Applications/wcstools/libwcs;
 			};
 			name = Debug;
 		};
 		6E72BBF61C44477B00DC68D3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = /Users/joshcardenzana/Applications/wcstools/libwcs;
 			};
 			name = Release;
 		};
