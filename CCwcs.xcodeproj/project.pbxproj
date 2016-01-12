@@ -214,6 +214,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				OTHER_LDFLAGS = (
+					"-L",
+					/Users/joshcardenzana/Applications/wcstools/libwcs,
+					"-lwcs",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USER_HEADER_SEARCH_PATHS = /Users/joshcardenzana/Applications/wcstools/libwcs;
 			};
@@ -223,6 +228,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				OTHER_LDFLAGS = (
+					"-L",
+					/Users/joshcardenzana/Applications/wcstools/libwcs,
+					"-lwcs",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USER_HEADER_SEARCH_PATHS = /Users/joshcardenzana/Applications/wcstools/libwcs;
 			};
@@ -247,6 +257,7 @@
 				6E72BBF61C44477B00DC68D3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
