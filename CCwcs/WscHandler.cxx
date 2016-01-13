@@ -120,7 +120,7 @@ WcsHandler::~WcsHandler()
 
 //_________________________________________________
 // Create a new WorldCoor object with all the same values as wcs_
-WorldCoor* WcsHandler::cloneWCS() const
+WorldCoor* WcsHandler::cloneWCS()
 {
     // Return a nullptr if this wcs_ is nullptr
     if (wcs_==nullptr) return nullptr ;
@@ -244,8 +244,8 @@ WorldCoor* WcsHandler::cloneWCS() const
     /* where %f is replaced by the image filename */
     /* where %x is replaced by image coordinates */
     // Just copy them element by element
-//    for (int commandIndx=0; commandIndx<9; ++commandIndx)
-//        wcscominit(wcs_copy, commandIndx, wcs_->command_format[commandIndx]) ;
+    for (int commandIndx=0; commandIndx<9; ++commandIndx)
+        wcscominit(wcs_copy, commandIndx, wcs_->command_format[commandIndx]) ;
     
     /* Image rotation matrix */
     std::copy(std::begin(wcs_->ltm), std::end(wcs_->ltm), std::begin(wcs_copy->ltm)) ;
@@ -369,7 +369,7 @@ void WcsHandler::SetScalingRotation(double cdelt1,	/* degrees/pixel in first axi
 //_________________________________________________
 /* wcspcset - set scaling, rotation from CDELTs and PC matrix */
 void WcsHandler::SetScalingRotation(double cdelt1,	/* degrees/pixel in first axis (or both axes) */
-                        double cdelt2,	/* degrees/pixel in second axis if nonzero */
+                        double cdelt2,              /* degrees/pixel in second axis if nonzero */
                         std::vector<double> pc)     /* Rotation matrix, ignored if NULL */
 {
     if (pc.empty()) {
@@ -380,6 +380,79 @@ void WcsHandler::SetScalingRotation(double cdelt1,	/* degrees/pixel in first axi
         // Throw a runtime_error an error message
         throw std::runtime_error("[ERROR] WcsHandler::SetScalingRotation() : Provided vector must have size=4") ;
     }
+}
+
+
+//_________________________________________________
+/* setwcserr - Set WCS error message for later printing */
+void WcsHandler::SetErrorMessage(const std::string& ErrMsg)
+{
+    char* cErrMsg = new char[ErrMsg.length()+1] ;
+    std::strcpy(cErrMsg, ErrMsg.c_str()) ;
+    setwcserr(cErrMsg) ;
+    
+    delete[] cErrMsg ;
+}
+
+
+//_________________________________________________
+/* wcsoutinit - Set output coordinate system for pix2wcs */
+void WcsHandler::SetWcsOutInit(const std::string& coord_sys)
+/* coord_sys - Coordinate system (B1950, J2000, etc) */
+{
+    char* c_coord_sys = new char[coord_sys.length()+1] ;
+    std::strcpy(c_coord_sys, coord_sys.c_str()) ;
+    wcsoutinit(wcs_, c_coord_sys) ;
+    delete[] c_coord_sys ;
+}
+
+
+//_________________________________________________
+/* wcsininit - Set input coordinate system for wcs2pix */
+void WcsHandler::WcsInInit(const std::string& coord_sys)
+/* coord_sys - Coordinate system (B1950, J2000, etc) */
+{
+    char* c_coord_sys = new char[coord_sys.length()+1] ;
+    std::strcpy(c_coord_sys, coord_sys.c_str()) ;
+    wcsininit(wcs_, c_coord_sys) ;
+    delete[] c_coord_sys ;
+}
+
+
+//_________________________________________________
+/* wcsreset - Change WCS using arguments */
+int WcsHandler::WcsReset(double crpix1,	/* Horizontal reference pixel */
+             double crpix2,	/* Vertical reference pixel */
+             double crval1,	/* Reference pixel horizontal coordinate in degrees */
+             double crval2,	/* Reference pixel vertical coordinate in degrees */
+             double cdelt1,	/* Horizontal scale in degrees/pixel, ignored if cd is not NULL */
+             double cdelt2,	/* Vertical scale in degrees/pixel, ignored if cd is not NULL */
+             double crota,	/* Rotation angle in degrees, ignored if cd is not NULL */
+             std::vector<double> cd)	/* Rotation matrix, used if not NULL */
+{
+    if (cd.empty()) {
+        return wcsreset(wcs_, crpix1, crpix2, crval1, crval2,
+                        cdelt1, cdelt2, crota, nullptr) ;
+    } else if (cd.size() == 4) {
+        return wcsreset(wcs_, crpix1, crpix2, crval1, crval2,
+                        cdelt1, cdelt2, crota, &cd[0]) ;
+    } else {
+        // Throw a runtime_error message
+        throw std::runtime_error("[ERROR] WcsHandler::WcsReset() : Provided vector must have size=4") ;
+        return -1 ;
+    }
+}
+
+
+//_________________________________________________
+/* wcscominit - Initialize catalog search command set by -wcscom */
+void WcsHandler::WcsComInit(int i,                      /* Number of command (0-9) to initialize */
+                            const std::string& command) /* command with %s where coordinates will go */
+{
+    char* com = new char[command.length()+1] ;
+    wcscominit(wcs_, i, com) ;
+    
+    delete[] com ;
 }
 
 # pragma mark - Protected Methods

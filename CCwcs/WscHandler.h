@@ -63,7 +63,7 @@ public :
     // Return a pointer to the contained WCS object
     WorldCoor* getWCS() {return wcs_ ;}
     // Return a separate copy of the contained WCS object
-    WorldCoor* cloneWCS() const ;
+    WorldCoor* cloneWCS() ;
     
     // Methods ported over from wcstools ===============================
     // Note that I've changed some of these names to make them a little more
@@ -112,75 +112,76 @@ public :
                             double cdelt2,	/* degrees/pixel in second axis if nonzero */
                             std::vector<double> pc=std::vector<double>(0));	/* Rotation matrix, ignored if NULL */
     
-    /***********************************************
-     * BELOW HERE ARE METHODS WHICH HAVE NOT CURRENTLY
-     * BEEN IMPLEMENTED AS METHODS OF WcsHandler
-     ***********************************************/
+    /* setwcserr - Set WCS error message for later printing */
+    void SetErrorMessage(const std::string& ErrMsg) ;
     
-    void setwcserr(	/* Set WCS error message for later printing */
-                   char *errmsg);	/* Error mesage < 80 char */
-    void wcserr(void);	/* Print WCS error message to stderr */
+    /* wcserr - Print WCS error message to stderr */
+    void PrintErrorMessage() {wcserr() ;}
     
-    void setdefwcs(	/* Set flag to use AIPS WCS instead of WCSLIB */
-                   int oldwcs);	/* 1 for AIPS WCS subroutines, else WCSLIB */
-    int getdefwcs(void);	/* Return flag for AIPS WCS set by setdefwcs */
+    /* setdefwcs - Set flag to use AIPS WCS instead of WCSLIB */
+    /* 1 for AIPS WCS subroutines, else WCSLIB */
+    void SetAipsFlag(int oldwcs) {setdefwcs(oldwcs) ;}
     
-    char *getradecsys(	/* Return name of image coordinate system */
-                      struct WorldCoor *wcs);	/* World coordinate system structure */
+    /* getdefwcs - Return flag for AIPS WCS set by setdefwcs */
+    int GetDefWcs() {return getdefwcs() ;}
     
-    void wcsoutinit(	/* Set output coordinate system for pix2wcs */
-                    struct WorldCoor *wcs,	/* World coordinate system structure */
-                    char *coorsys);	/* Coordinate system (B1950, J2000, etc) */
+    /* getradecsys - Return name of image coordinate system */
+    std::string GetRaDecSys() {return std::string(getradecsys(wcs_)) ;}
     
-    char *getwcsout(	/* Return current output coordinate system */
-                    struct WorldCoor *wcs);	/* World coordinate system structure */
+    /* wcsoutinit - Set output coordinate system for pix2wcs */
+    void SetWcsOutInit(const std::string& coordsys) ;
     
-    void wcsininit(	/* Set input coordinate system for wcs2pix */
-                   struct WorldCoor *wcs,	/* World coordinate system structure */
-                   char *coorsys);	/* Coordinate system (B1950, J2000, etc) */
+    /* getwcsout - Return current output coordinate system */
+    std::string GetWcsOut() {return std::string(getwcsout(wcs_) );}
     
-    char *getwcsin(	/* Return current input coordinate system */
-                   struct WorldCoor *wcs);	/* World coordinate system structure */
+    /* wcsininit - Set input coordinate system for wcs2pix */
+    void WcsInInit(const std::string& coord_sys) ;
     
-    int setwcsdeg(	/* Set WCS coordinate output format */
-                  struct WorldCoor *wcs,	/* World coordinate system structure */
-                  int degout);	/* 1= degrees, 0= hh:mm:ss dd:mm:ss */
+    /* getwcsin - Return current input coordinate system */
+    std::string GetWcsIn() {return std::string(getwcsin(wcs_)) ;}
     
-    int wcsndec(	/* Set or get number of output decimal places */
-                struct WorldCoor *wcs,	/* World coordinate system structure */
-                int ndec);	/* Number of decimal places in output string
-                             if < 0, return current ndec unchanged */
+    /* setwcsdeg - Set WCS coordinate output format
+     * degout : 1= degrees, 0= hh:mm:ss dd:mm:ss */
+    int SetWcsDeg(int degout) { return setwcsdeg(wcs_, degout) ;}
     
-    int wcsreset(	/* Change WCS using arguments */
-                 struct WorldCoor *wcs,	/* World coordinate system data structure */
-                 double crpix1,	/* Horizontal reference pixel */
+    /* wcsndec - Set or get number of output decimal places
+     * ndec : Number of decimal places in output string
+     *        if < 0, return current ndec unchanged */
+    int WcsNDec(int ndec) { return wcsndec(wcs_, ndec) ;}
+    
+    /* wcsreset - Change WCS using arguments */
+    int WcsReset(double crpix1,	/* Horizontal reference pixel */
                  double crpix2,	/* Vertical reference pixel */
                  double crval1,	/* Reference pixel horizontal coordinate in degrees */
                  double crval2,	/* Reference pixel vertical coordinate in degrees */
                  double cdelt1,	/* Horizontal scale in degrees/pixel, ignored if cd is not NULL */
                  double cdelt2,	/* Vertical scale in degrees/pixel, ignored if cd is not NULL */
                  double crota,	/* Rotation angle in degrees, ignored if cd is not NULL */
-                 double *cd);	/* Rotation matrix, used if not NULL */
+                 std::vector<double> cd);	/* Rotation matrix, used if not NULL */
     
-    void wcseqset(	/* Change equinox of reference pixel coordinates in WCS */
-                  struct WorldCoor *wcs,	/* World coordinate system data structure */
-                  double equinox);	/* Desired equinox as fractional year */
+    /* wcseqset - Change equinox of reference pixel coordinates in WCS
+     * equinox : Desired equinox as fractional year */
+    void WcsEqSet(double equinox) {wcseqset(wcs_, equinox) ;}
     
-    void setwcslin(	/* Set pix2wcst() mode for LINEAR coordinates */
-                   struct WorldCoor *wcs,	/* World coordinate system structure */
-                   int mode);	/* 0: x y linear, 1: x units x units
-                                 2: x y linear units */
+    /* setwcslin - Set pix2wcst() mode for LINEAR coordinates
+     * mode - 0: x y linear, 1: x units x units, 2: x y linear units */
+    void SetWcsLin(int mode) { setwcslin(wcs_, mode) ;}
     
-    int wcszin(		/* Set third dimension for cube projections */
-               int izpix);	/* Set coordinate in third dimension (face) */
+    /* wcszin - Set third dimension for cube projections
+     * izpix - Set coordinate in third dimension (face) */
+    int WcsZIn(int izpix) { return wcszin(izpix) ;}
     
-    int wcszout (	/* Return coordinate in third dimension */
-                 struct WorldCoor *wcs);	/* World coordinate system structure */
+    /* wcszout - Return coordinate in third dimension */
+    int WcsZOut() { return wcszout(wcs_) ;}
     
-    void wcscominit(	/* Initialize catalog search command set by -wcscom */
-                    struct WorldCoor *wcs,	/* World coordinate system structure */
-                    int i,		/* Number of command (0-9) to initialize */
-                    char *command);	/* command with %s where coordinates will go */
+    /* wcscominit - Initialize catalog search command set by -wcscom */
+    void WcsComInit(int i,                          /* Number of command (0-9) to initialize */
+                    const std::string& command);    /* command with %s where coordinates will go */
+    
+    /***********************************************
+     * BELOW HERE ARE METHODS WHICH HAVE NOT CURRENTLY
+     * BEEN IMPLEMENTED AS METHODS OF WcsHandler
+     ***********************************************/
     
     void wcscom(	/* Execute catalog search command set by -wcscom */
                 struct WorldCoor *wcs,	/* World coordinate system structure */
@@ -410,6 +411,12 @@ public :
 protected :
     // Keep track of the WCS information with an internal wcs object
     WorldCoor* wcs_ ;
+    
+    // Method for converting a std::string into a char*
+    char* str2char(const std::string& str) {
+        char* cstr = new char[str.length()+1] ;
+        return cstr ;
+    }
     
     // Some internal helper methods based on the underlying values
     //double DegToRad() {return PI/180.0 ;}
