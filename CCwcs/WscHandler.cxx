@@ -244,8 +244,8 @@ WorldCoor* WcsHandler::cloneWCS() const
     /* where %f is replaced by the image filename */
     /* where %x is replaced by image coordinates */
     // Just copy them element by element
-    for (int commandIndx=0; commandIndx<9; ++commandIndx)
-        wcscominit(wcs_copy, commandIndx, wcs_->command_format[commandIndx]) ;
+//    for (int commandIndx=0; commandIndx<9; ++commandIndx)
+//        wcscominit(wcs_copy, commandIndx, wcs_->command_format[commandIndx]) ;
     
     /* Image rotation matrix */
     std::copy(std::begin(wcs_->ltm), std::end(wcs_->ltm), std::begin(wcs_copy->ltm)) ;
@@ -317,6 +317,69 @@ void WcsHandler::GetRaDecSize_Rad(double  *cra,     /* Right ascension of image 
     *cdec *= D2R ;
     *width *= D2R ;
     *height *= D2R ;
+}
+
+
+//_________________________________________________
+/* wcssize - Return image center and size in RA and Dec */
+void WcsHandler::GetImageCenterSize_Deg(double *cra,	/* Right ascension of image center (deg) (returned) */
+                            double *cdec,	/* Declination of image center (deg) (returned) */
+                            double *dra,	/* Half-width in right ascension (deg) (returned) */
+                            double *ddec)	/* Half-width in declination (deg) (returned) */
+{
+    wcssize(wcs_, cra, cdec, dra, ddec) ;
+}
+
+//_________________________________________________
+/* wcsrange - Return min and max RA and Dec of image in degrees */
+void WcsHandler::GetImageRangeRaDec_Deg(double  *ra_min,	/* Min. right ascension of image (deg) (returned) */
+                            double  *ra_max,	/* Max. right ascension of image (deg) (returned) */
+                            double  *dec_min,	/* Min. declination of image (deg) (returned) */
+                            double  *dec_max)	/* Max. declination of image (deg) (returned) */
+{
+    wcsrange(wcs_, ra_min, ra_max, dec_min, dec_max) ;
+}
+
+
+//_________________________________________________
+/* wcscdset - Set scaling and rotation from CD matrix */
+void WcsHandler::SetScalingRotation(std::vector<double> cd)
+{
+    if (cd.empty()) {
+        wcscdset(wcs_, nullptr) ;
+    } else if (cd.size() == 4) {
+        wcscdset(wcs_, &cd[0]) ;
+    } else {
+        // Throw a runtime_error an error message
+        throw std::runtime_error("[ERROR] WcsHandler::SetScalingRotation() : Provided vector must have size=4") ;
+    }
+}
+
+
+//_________________________________________________
+/* wcsdeltset - set scaling, rotation from CDELTi, CROTA2 */
+void WcsHandler::SetScalingRotation(double cdelt1,	/* degrees/pixel in first axis (or both axes) */
+                                    double cdelt2,	/* degrees/pixel in second axis if nonzero */
+                                    double crota)	/* Rotation counterclockwise in degrees */
+{
+    wcsdeltset(wcs_, cdelt1, cdelt2, crota) ;
+}
+
+
+//_________________________________________________
+/* wcspcset - set scaling, rotation from CDELTs and PC matrix */
+void WcsHandler::SetScalingRotation(double cdelt1,	/* degrees/pixel in first axis (or both axes) */
+                        double cdelt2,	/* degrees/pixel in second axis if nonzero */
+                        std::vector<double> pc)     /* Rotation matrix, ignored if NULL */
+{
+    if (pc.empty()) {
+        wcspcset(wcs_, cdelt1, cdelt2, nullptr) ;
+    } else if (pc.size() == 4) {
+        wcspcset(wcs_, cdelt1, cdelt2, &pc[0]) ;
+    } else {
+        // Throw a runtime_error an error message
+        throw std::runtime_error("[ERROR] WcsHandler::SetScalingRotation() : Provided vector must have size=4") ;
+    }
 }
 
 # pragma mark - Protected Methods
