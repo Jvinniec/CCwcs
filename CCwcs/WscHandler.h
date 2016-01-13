@@ -63,7 +63,7 @@ public :
     // Return a pointer to the contained WCS object
     WorldCoor* getWCS() {return wcs_ ;}
     // Return a separate copy of the contained WCS object
-    WorldCoor* cloneWCS() ;
+    WorldCoor* cloneWCS() const ;
     
     // Methods ported over from wcstools ===============================
     // Note that I've changed some of these names to make them a little more

@@ -120,7 +120,7 @@ WcsHandler::~WcsHandler()
 
 //_________________________________________________
 // Create a new WorldCoor object with all the same values as wcs_
-WorldCoor* WcsHandler::cloneWCS()
+WorldCoor* WcsHandler::cloneWCS() const
 {
     // Return a nullptr if this wcs_ is nullptr
     if (wcs_==nullptr) return nullptr ;
