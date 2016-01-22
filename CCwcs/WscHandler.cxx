@@ -450,9 +450,59 @@ void WcsHandler::WcsComInit(int i,                      /* Number of command (0-
                             const std::string& command) /* command with %s where coordinates will go */
 {
     char* com = new char[command.length()+1] ;
+    std::strcpy(com, command.c_str()) ;
+    
     wcscominit(wcs_, i, com) ;
     
     delete[] com ;
+}
+
+
+//_________________________________________________
+/* wcscom - Execute catalog search command set by -wcscom */
+void WcsHandler::WcsCom(int i,                          /* Number of command (0-9) to execute */
+            const std::string& filename,    /* Image file name */
+            double xfile,                   /* Horizontal image pixel coordinates for WCS command */
+            double yfile,                   /* Vertical image pixel coordinates for WCS command */
+            const std::string& wcstring)   /* WCS String from pix2wcst() */
+{
+    char* cfilename = new char[filename.length()+1] ;
+    char* cwcstring = new char[wcstring.length()+1] ;
+    std::strcpy(cfilename, filename.c_str()) ;
+    std::strcpy(cwcstring, wcstring.c_str()) ;
+    
+    wcscom(wcs_, i, cfilename, xfile, yfile, cwcstring) ;
+    
+    delete[] cfilename ;
+    delete[] cwcstring ;
+}
+
+
+
+//_________________________________________________
+/* savewcscom - Save WCS shell command */
+void WcsHandler::SaveWcsCom(int i,                      /* i of 10 possible shell commands */
+                            const std::string& wcscom)  /* Shell command using output WCS string */
+{
+    char* cwcscom = new char[wcscom.length()+1] ;
+    std::strcpy(cwcscom, wcscom.c_str()) ;
+    
+    savewcscom(i, cwcscom) ;
+    
+    delete[] cwcscom ;
+}
+
+
+//_________________________________________________
+/* setwcsfile - Set filename for WCS error message */
+void WcsHandler::SetWcsFile(const std::string& filename)
+{
+    char* cfilename = new char[filename.length()+1] ;
+    std::strcpy(cfilename, filename.c_str()) ;
+    
+    setwcsfile(cfilename) ;
+    
+    delete[] cfilename ;
 }
 
 # pragma mark - Protected Methods

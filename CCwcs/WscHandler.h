@@ -178,31 +178,35 @@ public :
     void WcsComInit(int i,                          /* Number of command (0-9) to initialize */
                     const std::string& command);    /* command with %s where coordinates will go */
     
+    /* wcscom - Execute catalog search command set by -wcscom */
+    void WcsCom(int i,                          /* Number of command (0-9) to execute */
+                const std::string& filename,    /* Image file name */
+                double xfile,                   /* Horizontal image pixel coordinates for WCS command */
+                double yfile,                   /* Vertical image pixel coordinates for WCS command */
+                const std::string& wcstring) ;   /* WCS String from pix2wcst() */
+    
+    /* savewcscom - Save WCS shell command */
+    void SaveWcsCom(int i,                       /* i of 10 possible shell commands */
+                    const std::string& wcscom) ; /* Shell command using output WCS string */
+    
+    /* getwcscom - Return WCS shell command */
+    std::string GetWcsCom(int i)                 /* i of 10 possible shell commands */
+        {return std::string(getwcscom(i)) ;}
+    
+    /* setwcscom - Set WCS shell commands from stored values */
+    void SetWcsCom() {setwcscom(wcs_) ;}
+    
+    /* freewcscom - Free memory storing WCS shell commands */
+    void FreeWcsCom() {freewcscom(wcs_) ;}
+    
     /***********************************************
      * BELOW HERE ARE METHODS WHICH HAVE NOT CURRENTLY
      * BEEN IMPLEMENTED AS METHODS OF WcsHandler
      ***********************************************/
     
-    void wcscom(	/* Execute catalog search command set by -wcscom */
-                struct WorldCoor *wcs,	/* World coordinate system structure */
-                int i,		/* Number of command (0-9) to execute */
-                char *filename,	/* Image file name */
-                double xfile,	/* Horizontal image pixel coordinates for WCS command */
-                double yfile,	/* Vertical image pixel coordinates for WCS command */
-                char *wcstring); /* WCS String from pix2wcst() */
+    /* setwcsfile - Set filename for WCS error message */
+    void SetWcsFile(const std::string& filename) ; /* FITS or IRAF file name */
     
-    void savewcscom(	/* Save WCS shell command */
-                    int i,		/* i of 10 possible shell commands */
-                    char *wcscom);	/* Shell command using output WCS string */
-    char *getwcscom(	/* Return WCS shell command */
-                    int i);		/* i of 10 possible shell commands */
-    void setwcscom(	/* Set WCS shell commands from stored values */
-                   struct WorldCoor *wcs);	/* World coordinate system structure */
-    void freewcscom(	/* Free memory storing WCS shell commands */
-                    struct WorldCoor *wcs);	/* World coordinate system structure */
-    
-    void setwcsfile(	/* Set filename for WCS error message */
-                    char *filename); /* FITS or IRAF file name */
     int cpwcs (		/* Copy WCS keywords with no suffix to ones with suffix */
                char **header,	/* Pointer to start of FITS header */
                char *cwcs);	/* Keyword suffix character for output WCS */
@@ -415,6 +419,7 @@ protected :
     // Method for converting a std::string into a char*
     char* str2char(const std::string& str) {
         char* cstr = new char[str.length()+1] ;
+        std::strcpy(cstr, str.c_str()) ;
         return cstr ;
     }
     
