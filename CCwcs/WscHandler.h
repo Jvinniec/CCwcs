@@ -65,6 +65,15 @@ public :
     // Return a separate copy of the contained WCS object
     WorldCoor* cloneWCS() const ;
     
+    // Some useful methods for converting coordinates between systems
+    static void Celestial2Galactic() {} ;
+    static void Galactic2Celestial() {} ;
+    static void Coordinate2Projected() {} ;
+    
+    // Methods for getting the angular separation between two positions
+    static double AngularSeparation_Deg() {return 0.0;}
+    static double AngularSeparation_Rad() {return 0.0 ;}
+    
     // Methods ported over from wcstools ===============================
     // Note that I've changed some of these names to make them a little more
     // meaningful. I've also identified the corresponding method in the wcstools
@@ -210,6 +219,8 @@ public :
     int cpwcs (		/* Copy WCS keywords with no suffix to ones with suffix */
                char **header,	/* Pointer to start of FITS header */
                char *cwcs);	/* Keyword suffix character for output WCS */
+    int CpWcs(const std::string& header,
+              const std::string& cwcs) ;
     
     void savewcscoor(	/* Save output coordinate system */
                      char *wcscoor);	/* coordinate system (J2000, B1950, galactic) */

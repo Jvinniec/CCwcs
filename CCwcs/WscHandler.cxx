@@ -505,4 +505,14 @@ void WcsHandler::SetWcsFile(const std::string& filename)
     delete[] cfilename ;
 }
 
+
+/* cpwcs - Copy WCS keywords with no suffix to ones with suffix */
+           char **header,	/* Pointer to start of FITS header */
+           char *cwcs);	/* Keyword suffix character for output WCS */
+int CpWcs(const std::string& header,
+          const std::string& cwcs)
+{
+    
+}
+
 # pragma mark - Protected Methods
