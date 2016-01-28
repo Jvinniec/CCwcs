@@ -16,7 +16,7 @@
 
 #include <iterator>
 
-#include "WscHandler.h"
+#include "WcsHandler.h"
 
 # pragma mark - Constructors/Destructors
 
