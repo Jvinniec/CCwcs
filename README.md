@@ -9,9 +9,13 @@ for the wcstools 'WorldCoor' structure.
 BUILDING
 ---------------------
 Building should be as simple as:
+
 	 $ ./configure [--with-wcs=/path/to/wcstools] [--prefix=/installation/directory]
+
 	 $ make
+
 	 $ make install
+
 Alternatively, if there is no 'configure' file, you can run the included autogen.sh script.
 
 DISCLAIMER
