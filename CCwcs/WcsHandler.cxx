@@ -764,4 +764,56 @@ void WcsHandler::Foc2Pix(double x_focal_plane,	/* Focal plane horizontal coordin
     foc2pix(wcs_, x_focal_plane, y_focal_plane, x_pixel_coord, y_pixel_coord) ;
 }
 
+
+//_________________________________________________
+/* SetFITSPlate - Set FITS header plate fit coefficients from structure */
+/* Returns a string that represents the new header value */
+std::string WcsHandler::SetFitsPlate(const std::string& header)  /* Current image FITS header */
+{
+    // First get a new header char* variable then fill it
+    char* cheader = str2char(header) ;
+    SetFITSPlate(cheader, wcs_) ;
+    // Now create a new header string from the modified char* header and return it
+    std::string new_header = std::string(cheader) ;
+    delete[] cheader ;
+    return new_header ;
+}
+
+
+//_________________________________________________
+/* GetPlate - Return plate fit coefficients from structure in arguments */
+int WcsHandler::GetPlateCoeff(int *ncoeff1,	/* Number of coefficients for x */
+                              int *ncoeff2,	/* Number of coefficients for y) */
+                              std::vector<double>& coeff) /* Plate fit coefficients */
+{
+    // I can cheat a little by knowing that the ncoeff1 and ncoeff2 come from wcs_
+    // and that coeff is the size of the sum of the two
+    int size = wcs_->ncoeff1 + wcs_->ncoeff2 ;
+    
+    // First create a coefficient array and fill it
+    double* coeff_array = new double[size] ;
+    int ret = GetPlate(wcs_, ncoeff1, ncoeff2, coeff_array) ;
+
+    // Resize the coeff vector
+    coeff.resize(*ncoeff1 + *ncoeff2) ;
+    
+    // Now fill the coeff vector from the values stored in the array
+    for (int i=0; i < *ncoeff1; i++)
+        coeff[i] = coeff_array[i] ;
+    
+    for (int i=0; i < *ncoeff2; i++)
+        coeff[*ncoeff1+i] = coeff_array[*ncoeff1+1] ;
+    
+    delete[] coeff_array ;
+    return ret ;
+}
+
 # pragma mark - Protected Methods
+
+//_________________________________________________
+char* str2char(const std::string& str)
+{
+    char* cstr = new char[str.length()+1] ;
+    std::strcpy(cstr, str.c_str()) ;
+    return cstr ;
+}

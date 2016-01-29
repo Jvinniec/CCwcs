@@ -54,6 +54,7 @@ public :
     
     // Create from a WorldCoor object
     WcsHandler(WorldCoor* wcs) ;
+    
     // Copy constructor
     WcsHandler(const WcsHandler& other) ;
     
@@ -226,7 +227,7 @@ public :
      ***********************************************/
 
     /* wcsconv - Convert between coordinate systems and equinoxes */
-    void WcsConv(int coordsys_in,       /* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
+    static void WcsConv(int coordsys_in,       /* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
                  int coordsys_out,      /* Output coordinate system (J2000, B1950, ECLIPTIC, G ALACTIC */
                  double equinox_in,     /* Input equinox (default of coordsys_in if 0.0) */
                  double equinox_out,	/* Output equinox (default of coordsys_out if 0.0) */
@@ -243,7 +244,7 @@ public :
                  double *rad_velocity);	/* Radial velocity in km/sec */
     
     /* wcsconp - Convert between coordinate systems and equinoxes */
-    void WcsConp(int coordsys_in,	/* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
+    static void WcsConp(int coordsys_in,	/* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
                  int coordsys_out,	/* Output coordinate system (J2000, B1950, ECLIPTIC, G ALACTIC */
                  double equinox_in,	/* Input equinox (default of coordsys_in if 0.0) */
                  double equinox_out,/* Output equinox (default of coordsys_out if 0.0) */
@@ -259,7 +260,7 @@ public :
                                                  Input in coordsys_in, returned in coordsys_out */
     
     /* wcscon - Convert between coordinate systems and equinoxes */
-    void WcsCon(int sys1,	/* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
+    static void WcsCon(int sys1,	/* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
                 int sys2,	/* Output coordinate system (J2000, B1950, ECLIPTIC, G ALACTIC */
                 double eq1,	/* Input equinox (default of sys1 if 0.0) */
                 double eq2,	/* Output equinox (default of sys2 if 0.0) */
@@ -270,27 +271,26 @@ public :
                 double epoch);	/* Besselian epoch in years */
     
     /* fk425e - Convert B1950(FK4) to J2000(FK5) coordinates */
-    void FK4to5e(double *ra,	/* Right ascension in degrees (B1950 in, J2000 out) */
-                 double *dec,	/* Declination in degrees (B1950 in, J2000 out) */
-                 double epoch);	/* Besselian epoch in years */
+    static void FK4to5e(double *ra,	/* Right ascension in degrees (B1950 in, J2000 out) */
+                        double *dec,	/* Declination in degrees (B1950 in, J2000 out) */
+                        double epoch);	/* Besselian epoch in years */
     
     /* fk524e - Convert J2000(FK5) to B1950(FK4) coordinates */
-    void FK5to4e(double *ra,	/* Right ascension in degrees (J2000 in, B1950 out) */
-                 double *dec,	/* Declination in degrees (J2000 in, B1950 out) */
-                 double epoch);	/* Besselian epoch in years */
+    static void FK5to4e(double *ra,	/* Right ascension in degrees (J2000 in, B1950 out) */
+                        double *dec,	/* Declination in degrees (J2000 in, B1950 out) */
+                        double epoch);	/* Besselian epoch in years */
     
     /* wcscsys - Return code for coordinate system in string */
-    int GetCoordSystemCode(const std::string& coord_sys) ; /* Coordinate system (B1950, J2000, etc) */
+    static int GetCoordSystemCode(const std::string& coord_sys) ; /* Coordinate system (B1950, J2000, etc) */
     
     /* wcsceq - Set equinox from string (return 0.0 if not obvious) */
     double WcsCeq(const std::string& wcstring) ; /* Coordinate system (B1950, J2000, etc) */
     
     /* wcscstr - Set coordinate system type string from system and equinox */
     std::string WcsCstr(/* Coordinate system string (returned) */
-                 int    coord_sys_code,	/* Coordinate system code */
-                 double equinox,        /* Equinox of coordinate system */
-                 double epoch);         /* Epoch of coordinate system */
-    
+                        int    coord_sys_code,	/* Coordinate system code */
+                        double equinox,        /* Equinox of coordinate system */
+                        double epoch);         /* Epoch of coordinate system */
     
     /* d2v3 - Convert RA and Dec in degrees and distance to vector */
     /* x,y,z geocentric equatorial position of object (returned) */
@@ -330,7 +330,6 @@ public :
     /* getdistcode - Return distortion code string for CTYPEi */
     std::string GetDistCode() {return std::string(getdistcode(wcs_)) ;}
     
-    
     /* DelDistort - Delete all distortion-related fields */
     int DeleteDistort(const std::string& header,    /* FITS header */
                       int verbose) ;                /* If !=0, print keywords as deleted */
@@ -351,115 +350,125 @@ public :
      * Other projection subroutines
      ***********************************************/
     
+    /* 8 projections using AIPS algorithms (worldpos.c) */
+    
+    /* worldpos - Convert from pixel location to RA,Dec */
+    int WorldPos(double xpix,	/* x pixel number  (RA or long without rotation) */
+                 double ypix,	/* y pixel number  (Dec or lat without rotation) */
+                 double *xpos,	/* x (RA) coordinate (deg) (returned) */
+                 double *ypos)	/* y (dec) coordinate (deg) (returned) */
+        {return worldpos(xpix, ypix, wcs_, xpos, ypos) ;}
+    
+    /* worldpix - Convert from RA,Dec to pixel location */
+    int WorldPix(double xpos,	/* x (RA) coordinate (deg) */
+                 double ypos,	/* y (dec) coordinate (deg) */
+                 double *xpix,	/* x pixel number (RA or long without rotation) */
+                 double *ypix)	/* y pixel number (dec or lat without rotation) */
+        {return worldpix(xpos, ypos, wcs_, xpix, ypix) ;}
+    
     /***********************************************
-     * BELOW HERE ARE METHODS WHICH HAVE NOT CURRENTLY
-     * BEEN IMPLEMENTED AS METHODS OF WcsHandler
+     * Digital Sky Survey projection (dsspos.c)
      ***********************************************/
     
-    /* 8 projections using AIPS algorithms (worldpos.c) */
-    int worldpos (	/* Convert from pixel location to RA,Dec */
-                  double xpix,	/* x pixel number  (RA or long without rotation) */
-                  double ypix,	/* y pixel number  (Dec or lat without rotation) */
-                  struct WorldCoor *wcs, /* WCS parameter structure */
-                  double *xpos,	/* x (RA) coordinate (deg) (returned) */
-                  double *ypos);	/* y (dec) coordinate (deg) (returned) */
-    int worldpix (	/* Convert from RA,Dec to pixel location */
-                  double xpos,	/* x (RA) coordinate (deg) */
-                  double ypos,	/* y (dec) coordinate (deg) */
-                  struct WorldCoor *wcs, /* WCS parameter structure */
-                  double *xpix,	/* x pixel number (RA or long without rotation) */
-                  double *ypix);	/* y pixel number (dec or lat without rotation) */
+    /* dsspos - Convert from pixel location to RA,Dec */
+    int DssPos(double xpix,     /* x pixel number  (RA or long without rotation) */
+               double ypix,     /* y pixel number  (Dec or lat without rotation) */
+               double *xpos,	/* x (RA) coordinate (deg) (returned) */
+               double *ypos)	/* y (dec) coordinate (deg) (returned) */
+        {return dsspos(xpix, ypix, wcs_, xpos, ypos) ;}
     
-    /* Digital Sky Survey projection (dsspos.c) */
-    int dsspos (	/* Convert from pixel location to RA,Dec */
-                double xpix,	/* x pixel number  (RA or long without rotation) */
-                double ypix,	/* y pixel number  (Dec or lat without rotation) */
-                struct WorldCoor *wcs, /* WCS parameter structure */
-                double *xpos,	/* x (RA) coordinate (deg) (returned) */
-                double *ypos);	/* y (dec) coordinate (deg) (returned) */
-    int dsspix (	/* Convert from RA,Dec to pixel location */
-                double xpos,	/* x (RA) coordinate (deg) */
-                double ypos,	/* y (dec) coordinate (deg) */
-                struct WorldCoor *wcs, /* WCS parameter structure */
-                double *xpix,	/* x pixel number (RA or long without rotation) */
-                double *ypix);	/* y pixel number (dec or lat without rotation) */
+    /* dsspix - Convert from RA,Dec to pixel location */
+    int DssPix(double xpos,     /* x (RA) coordinate (deg) */
+               double ypos,     /* y (dec) coordinate (deg) */
+               double *xpix,	/* x pixel number (RA or long without rotation) */
+               double *ypix)	/* y pixel number (dec or lat without rotation) */
+        {return dsspix(xpos, ypos, wcs_, xpix, ypix) ;}
     
-    /* SAO TDC TAN projection with higher order terms (platepos.c) */
-    int platepos (	/* Convert from pixel location to RA,Dec */
-                  double xpix,	/* x pixel number  (RA or long without rotation) */
-                  double ypix,	/* y pixel number  (Dec or lat without rotation) */
-                  struct WorldCoor *wcs, /* WCS parameter structure */
-                  double *xpos,	/* x (RA) coordinate (deg) (returned) */
-                  double *ypos);	/* y (dec) coordinate (deg) (returned) */
-    int platepix (	/* Convert from RA,Dec to pixel location */
-                  double xpos,	/* x (RA) coordinate (deg) */
-                  double ypos,	/* y (dec) coordinate (deg) */
-                  struct WorldCoor *wcs, /* WCS parameter structure */
-                  double *xpix,	/* x pixel number (RA or long without rotation) */
-                  double *ypix);	/* y pixel number (dec or lat without rotation) */
-    void SetFITSPlate (	/* Set FITS header plate fit coefficients from structure */
-                       char *header,	/* Image FITS header */
-                       struct WorldCoor *wcs); /* WCS structure */
-    int SetPlate (	/* Set plate fit coefficients in structure from arguments */
-                  struct WorldCoor *wcs, /* World coordinate system structure */
-                  int ncoeff1,	/* Number of coefficients for x */
-                  int ncoeff2,	/* Number of coefficients for y */
-                  double *coeff);	/* Plate fit coefficients */
-    int GetPlate (	/* Return plate fit coefficients from structure in arguments */
-                  struct WorldCoor *wcs, /* World coordinate system structure */
-                  int *ncoeff1,	/* Number of coefficients for x */
-                  int *ncoeff2,	/* Number of coefficients for y) */
-                  double *coeff);	/* Plate fit coefficients */
+    /***********************************************
+     * SAO TDC TAN projection with higher order terms (platepos.c)
+     ***********************************************/
     
-    /* IRAF TAN projection with higher order terms (tnxpos.c) */
-    int tnxinit (	/* initialize the gnomonic forward or inverse transform */
-                 const char *header, /* FITS header */
-                 struct WorldCoor *wcs); /* pointer to WCS structure */
-    int tnxpos (	/* forward transform (physical to world) gnomonic projection. */
-                double xpix,	/* Image X coordinate */
-                double ypix,	/* Image Y coordinate */
-                struct WorldCoor *wcs, /* pointer to WCS descriptor */
-                double *xpos,	/* Right ascension (returned) */
-                double *ypos);	/* Declination (returned) */
-    int tnxpix (	/* Inverse transform (world to physical) gnomonic projection */
-                double xpos,     /* Right ascension */
-                double ypos,     /* Declination */
-                struct WorldCoor *wcs, /* Pointer to WCS descriptor */
-                double *xpix,	/* Image X coordinate (returned) */
-                double *ypix);	/* Image Y coordinate (returned) */
+    /* platepos - Convert from pixel location to RA,Dec */
+    int PlatePos(double xpix,	/* x pixel number  (RA or long without rotation) */
+                 double ypix,	/* y pixel number  (Dec or lat without rotation) */
+                 double *xpos,	/* x (RA) coordinate (deg) (returned) */
+                 double *ypos)	/* y (dec) coordinate (deg) (returned) */
+        {return platepos(xpix, ypix, wcs_, xpos, ypos) ;}
     
-    /* IRAF ZPN projection with higher order terms (zpxpos.c) */
-    int zpxinit (	/* initialize the zenithal forward or inverse transform */
-                 const char *header, /* FITS header */
-                 struct WorldCoor *wcs); /* pointer to WCS structure */
-    int zpxpos (	/* forward transform (physical to world) */
-                double xpix,	/* Image X coordinate */
-                double ypix,	/* Image Y coordinate */
-                struct WorldCoor *wcs, /* pointer to WCS descriptor */
-                double *xpos,	/* Right ascension (returned) */
-                double *ypos);	/* Declination (returned) */
-    int zpxpix (	/* Inverse transform (world to physical) */
-                double xpos,	/* Right ascension */
-                double ypos,	/* Declination */
-                struct WorldCoor *wcs, /* Pointer to WCS descriptor */
-                double *xpix,	/* Image X coordinate (returned) */
-                double *ypix);	/* Image Y coordinate (returned) */
+    /* platepix - Convert from RA,Dec to pixel location */
+    int PlatePix(double xpos,	/* x (RA) coordinate (deg) */
+                 double ypos,	/* y (dec) coordinate (deg) */
+                 double *xpix,	/* x pixel number (RA or long without rotation) */
+                 double *ypix)	/* y pixel number (dec or lat without rotation) */
+        {return platepix(xpos, ypos, wcs_, xpix, ypix) ;}
 
+    /* SetFITSPlate - Set FITS header plate fit coefficients from structure */
+    /* Returns a string that represents the new header value */
+    std::string SetFitsPlate(const std::string& header) ; /* Current image FITS header */
+    
+    
+    /* SetPlate - Set plate fit coefficients in structure from arguments */
+    int SetPlateCoeff(int ncoeff1,	/* Number of coefficients for x */
+                      int ncoeff2,	/* Number of coefficients for y */
+                      std::vector<double> coeff)	/* Plate fit coefficients */
+        {return SetPlate(wcs_, ncoeff1, ncoeff2, &coeff[0]) ;}
+    
+    
+    /* GetPlate - Return plate fit coefficients from structure in arguments */
+    int GetPlateCoeff(int *ncoeff1,	/* Number of coefficients for x */
+                      int *ncoeff2,	/* Number of coefficients for y) */
+                      std::vector<double>& coeff) ; /* Plate fit coefficients */
+    
+    /***********************************************
+     * IRAF TAN projection with higher order terms (tnxpos.c)
+     ***********************************************/
+    
+    /* tnxinit - initialize the gnomonic forward or inverse transform */
+    int TnxInit(const std::string& header) /* FITS header */
+        {return tnxinit(header.c_str(), wcs_) ;}
+    
+    /* tnxpos - forward transform (physical to world) gnomonic projection. */
+    int TnxPos(double xpix,     /* Image X coordinate */
+               double ypix,     /* Image Y coordinate */
+               double *xpos,	/* Right ascension (returned) */
+               double *ypos)	/* Declination (returned) */
+        {return tnxpos(xpix, ypix, wcs_, xpos, ypos) ;}
+    
+    /* tnxpix - Inverse transform (world to physical) gnomonic projection */
+    int TnxPix(double xpos,     /* Right ascension */
+               double ypos,     /* Declination */
+               double *xpix,	/* Image X coordinate (returned) */
+               double *ypix)	/* Image Y coordinate (returned) */
+        {return tnxpix(xpos, ypos, wcs_, xpix, ypix) ;}
+    
+    /***********************************************
+     * IRAF ZPN projection with higher order terms (zpxpos.c)
+     ***********************************************/
+    
+    /* zpxinit - initialize the zenithal forward or inverse transform */
+    int ZpxInit(const std::string& header)
+        {return zpxinit(header.c_str(), wcs_) ;}
+    
+    /* zpxpos - forward transform (physical to world) */
+    int ZpxPos(double xpix,     /* Image X coordinate */
+               double ypix,     /* Image Y coordinate */
+               double *xpos,	/* Right ascension (returned) */
+               double *ypos)	/* Declination (returned) */
+        {return zpxpos(xpix, ypix, wcs_, xpos, ypos) ;}
+    
+    /* zpxpix - Inverse transform (world to physical) */
+    int ZpxPix(double xpos,     /* Right ascension */
+               double ypos,     /* Declination */
+               double *xpix,	/* Image X coordinate (returned) */
+               double *ypix)	/* Image Y coordinate (returned) */
+        {return zpxpix(xpos, ypos, wcs_, xpix, ypix) ;}
     
 protected :
     // Keep track of the WCS information with an internal wcs object
     WorldCoor* wcs_ ;
     
     // Method for converting a std::string into a char*
-    char* str2char(const std::string& str) {
-        char* cstr = new char[str.length()+1] ;
-        std::strcpy(cstr, str.c_str()) ;
-        return cstr ;
-    }
-    
-    // Some internal helper methods based on the underlying values
-    //double DegToRad() {return PI/180.0 ;}
-    //double RadToDeg() {return 180.0/PI ;}
+    static char* str2char(const std::string& str) ;
     
 private :
     
