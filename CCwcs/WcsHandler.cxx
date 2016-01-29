@@ -622,35 +622,86 @@ void WcsHandler::FK5to4e(double *ra,	/* Right ascension in degrees (J2000 in, B1
 }
 
 
-int wcscsys(	/* Return code for coordinate system in string */
-            char *coorsys);	 /* Coordinate system (B1950, J2000, etc) */
-double wcsceq (	/* Set equinox from string (return 0.0 if not obvious) */
-               char *wcstring);  /* Coordinate system (B1950, J2000, etc) */
-void wcscstr (	/* Set coordinate system type string from system and equinox */
-              char   *cstr,	 /* Coordinate system string (returned) */
-              int    syswcs,	/* Coordinate system code */
-              double equinox,	/* Equinox of coordinate system */
-              double epoch);	/* Epoch of coordinate system */
-void d2v3 (		/* Convert RA and Dec in degrees and distance to vector */
-           double	rra,	/* Right ascension in degrees */
-           double	rdec,	/* Declination in degrees */
-           double	r,	/* Distance to object in same units as pos */
-           double pos[3]);	/* x,y,z geocentric equatorial position of object (returned) */
-void s2v3 (		/* Convert RA and Dec in radians and distance to vector */
-           double	rra,	/* Right ascension in radians */
-           double	rdec,	/* Declination in radians */
-           double	r,	/* Distance to object in same units as pos */
-           double pos[3]);	/* x,y,z geocentric equatorial position of object (returned) */
-void v2d3 (		/* Convert vector to RA and Dec in degrees and distance */
-           double	pos[3],	/* x,y,z geocentric equatorial position of object */
-           double	*rra,	/* Right ascension in degrees (returned) */
-           double	*rdec,	/* Declination in degrees (returned) */
-           double	*r);	/* Distance to object in same units as pos (returned) */
-void v2s3 (		/* Convert vector to RA and Dec in radians and distance */
-           double	pos[3],	/* x,y,z geocentric equatorial position of object */
-           double	*rra,	/* Right ascension in radians (returned) */
-           double	*rdec,	/* Declination in radians (returned) */
-           double	*r);	/* Distance to object in same units as pos (returned) */
+//_________________________________________________
+/* wcscsys - Return code for coordinate system in string */
+int WcsHandler::GetCoordSystemCode(const std::string& coord_sys) /* Coordinate system (B1950, J2000, etc) */
+{
+    char* ccoorsys = str2char(coord_sys) ;
+    int code = wcscsys(ccoorsys) ;
+    delete[] ccoorsys ;
+    return code ;
+}
 
+
+//_________________________________________________
+/* wcsceq - Set equinox from string (return 0.0 if not obvious) */
+double WcsHandler::WcsCeq(const std::string& wcstring)  /* Coordinate system (B1950, J2000, etc) */
+{
+    char* cwcstring = str2char(wcstring) ;
+    double ret = wcsceq(cwcstring);
+    delete[] cwcstring ;
+    return ret ;
+}
+
+
+//_________________________________________________
+/* wcscstr - Set coordinate system type string from system and equinox */
+std::string WcsCstr(/* Coordinate system string (returned) */
+                    int    coord_sys_code,	/* Coordinate system code */
+                    double equinox,        /* Equinox of coordinate system */
+                    double epoch)          /* Epoch of coordinate system */
+{
+    char* coord_sys ;
+    wcscstr(coord_sys, coord_sys_code, equinox, epoch) ;
+    return std::string(coord_sys) ;
+}
+
+
+//_________________________________________________
+/* d2v3 - Convert RA and Dec in degrees and distance to vector */
+/* x,y,z geocentric equatorial position of object (returned) */
+std::vector<double> D2v3(double	rra,	/* Right ascension in degrees */
+                         double	rdec,	/* Declination in degrees */
+                         double	r)      /* Distance to object in same units as pos */
+{
+    std::vector<double> pos(3,0.0) ;
+    d2v3(rra, rdec, r, &pos[0]) ;
+    return pos ;
+}
+
+
+//_________________________________________________
+/* s2v3 - Convert RA and Dec in radians and distance to vector */
+/* x,y,z geocentric equatorial position of object (returned) */
+std::vector<double> S2v3(double	rra,	/* Right ascension in radians */
+                         double	rdec,	/* Declination in radians */
+                         double	r)      /* Distance to object in same units as pos */
+{
+    std::vector<double> pos(3, 0.0) ;
+    s2v3(rra, rdec, r, &pos[0]) ;
+    return pos ;
+}
+
+
+//_________________________________________________
+/* v2d3 - Convert vector to RA and Dec in degrees and distance */
+void V2d3(std::vector<double> pos,  /* x,y,z geocentric equatorial position of object */
+          double	*rra,           /* Right ascension in degrees (returned) */
+          double	*rdec,          /* Declination in degrees (returned) */
+          double	*r)             /* Distance to object in same units as pos (returned) */
+{
+    v2d3(&pos[0], rra, rdec, r) ;
+}
+
+
+//_________________________________________________
+/* v2s3 - Convert vector to RA and Dec in radians and distance */
+void V2s3(std::vector<double> pos,	/* x,y,z geocentric equatorial position of object */
+          double	*rra,           /* Right ascension in radians (returned) */
+          double	*rdec,          /* Declination in radians (returned) */
+          double	*r)             /* Distance to object in same units as pos (returned) */
+{
+    v2s3(&pos[0], rra, rdec, r) ;
+}
 
 # pragma mark - Protected Methods

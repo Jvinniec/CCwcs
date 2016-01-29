@@ -280,42 +280,53 @@ public :
                  double *dec,	/* Declination in degrees (J2000 in, B1950 out) */
                  double epoch);	/* Besselian epoch in years */
     
+    /* wcscsys - Return code for coordinate system in string */
+    int GetCoordSystemCode(const std::string& coord_sys) ; /* Coordinate system (B1950, J2000, etc) */
+    
+    /* wcsceq - Set equinox from string (return 0.0 if not obvious) */
+    double WcsCeq(const std::string& wcstring) ; /* Coordinate system (B1950, J2000, etc) */
+    
+    /* wcscstr - Set coordinate system type string from system and equinox */
+    std::string WcsCstr(/* Coordinate system string (returned) */
+                 int    coord_sys_code,	/* Coordinate system code */
+                 double equinox,        /* Equinox of coordinate system */
+                 double epoch);         /* Epoch of coordinate system */
+    
+    
+    /* d2v3 - Convert RA and Dec in degrees and distance to vector */
+    /* x,y,z geocentric equatorial position of object (returned) */
+    std::vector<double> D2v3(double	rra,	/* Right ascension in degrees */
+                             double	rdec,	/* Declination in degrees */
+                             double	r);     /* Distance to object in same units as pos */
+
+    /* s2v3 - Convert RA and Dec in radians and distance to vector */
+    /* x,y,z geocentric equatorial position of object (returned) */
+    std::vector<double> S2v3(double	rra,	/* Right ascension in radians */
+                             double	rdec,	/* Declination in radians */
+                             double	r);     /* Distance to object in same units as pos */
+    
+    
+    /* v2d3 - Convert vector to RA and Dec in degrees and distance */
+    void V2d3(std::vector<double> pos,  /* x,y,z geocentric equatorial position of object */
+              double	*rra,           /* Right ascension in degrees (returned) */
+              double	*rdec,          /* Declination in degrees (returned) */
+              double	*r);            /* Distance to object in same units as pos (returned) */
+    
+    /* v2s3 - Convert vector to RA and Dec in radians and distance */
+    void V2s3(std::vector<double> pos,	/* x,y,z geocentric equatorial position of object */
+              double	*rra,           /* Right ascension in radians (returned) */
+              double	*rdec,          /* Declination in radians (returned) */
+              double	*r);            /* Distance to object in same units as pos (returned) */
+    
     /***********************************************
      * BELOW HERE ARE METHODS WHICH HAVE NOT CURRENTLY
      * BEEN IMPLEMENTED AS METHODS OF WcsHandler
      ***********************************************/
     
-    int wcscsys(	/* Return code for coordinate system in string */
-                char *coorsys);	 /* Coordinate system (B1950, J2000, etc) */
-    double wcsceq (	/* Set equinox from string (return 0.0 if not obvious) */
-                   char *wcstring);  /* Coordinate system (B1950, J2000, etc) */
-    void wcscstr (	/* Set coordinate system type string from system and equinox */
-                  char   *cstr,	 /* Coordinate system string (returned) */
-                  int    syswcs,	/* Coordinate system code */
-                  double equinox,	/* Equinox of coordinate system */
-                  double epoch);	/* Epoch of coordinate system */
-    void d2v3 (		/* Convert RA and Dec in degrees and distance to vector */
-               double	rra,	/* Right ascension in degrees */
-               double	rdec,	/* Declination in degrees */
-               double	r,	/* Distance to object in same units as pos */
-               double pos[3]);	/* x,y,z geocentric equatorial position of object (returned) */
-    void s2v3 (		/* Convert RA and Dec in radians and distance to vector */
-               double	rra,	/* Right ascension in radians */
-               double	rdec,	/* Declination in radians */
-               double	r,	/* Distance to object in same units as pos */
-               double pos[3]);	/* x,y,z geocentric equatorial position of object (returned) */
-    void v2d3 (		/* Convert vector to RA and Dec in degrees and distance */
-               double	pos[3],	/* x,y,z geocentric equatorial position of object */
-               double	*rra,	/* Right ascension in degrees (returned) */
-               double	*rdec,	/* Declination in degrees (returned) */
-               double	*r);	/* Distance to object in same units as pos (returned) */
-    void v2s3 (		/* Convert vector to RA and Dec in radians and distance */
-               double	pos[3],	/* x,y,z geocentric equatorial position of object */
-               double	*rra,	/* Right ascension in radians (returned) */
-               double	*rdec,	/* Declination in radians (returned) */
-               double	*r);	/* Distance to object in same units as pos (returned) */
-    
-    /* Distortion model subroutines in distort.c */
+    /***********************************************
+     * Distortion model subroutines in distort.c
+     ***********************************************/
+
     void distortinit (	/* Set distortion coefficients from FITS header */
                       struct WorldCoor *wcs,	/* World coordinate system structure */
                       const char* hstring);	/* FITS header */
