@@ -215,49 +215,52 @@ public :
     int CpWcs(const std::string& header,    /* Pointer to start of FITS header */
               const std::string& cwcs) ;    /* Keyword suffix character for output WCS */
     
+    /* savewcscoor - Save output coordinate system */
+    void SaveWcsCoor(const std::string& wcscoor) ; /* coordinate system (J2000, B1950, galactic) */
+
+    /* getwcscoor - Return output coordinate system */
+    std::string GetWcsCoor() ;
+    
     /***********************************************
-     * BELOW HERE ARE METHODS WHICH HAVE NOT CURRENTLY
-     * BEEN IMPLEMENTED AS METHODS OF WcsHandler
+     * Coordinate conversion subroutines in wcscon.c
      ***********************************************/
+
     
-    void savewcscoor(	/* Save output coordinate system */
-                     char *wcscoor);	/* coordinate system (J2000, B1950, galactic) */
-    char *getwcscoor(void); /* Return output coordinate system */
+    /* wcsconv - Convert between coordinate systems and equinoxes */
+    void WcsConv(int coordsys_in,       /* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
+                 int coordsys_out,      /* Output coordinate system (J2000, B1950, ECLIPTIC, G ALACTIC */
+                 double equinox_in,     /* Input equinox (default of coordsys_in if 0.0) */
+                 double equinox_out,	/* Output equinox (default of coordsys_out if 0.0) */
+                 double epoch_in,       /* Input Besselian epoch in years */
+                 double epoch_out,      /* Output Besselian epoch in years */
+                 double *x_coord,       /* Longitude or right ascension in degrees
+                                         Input in sys1, returned in sys2 */
+                 double *y_coord,       /* Latitude or declination in degrees
+                                         Input in coordsys_in, returned in coordsys_out */
+                 double *x_coord_proper_motion,/* Longitude or right ascension proper motion in deg/year
+                                                Input in coordsys_in, returned in coordsys_out */
+                 double *y_coord_proper_motion,	/* Latitude or declination proper motion in deg/year */
+                 double *parallax,      /* Parallax in arcseconds */
+                 double *rad_velocity);	/* Radial velocity in km/sec */
     
-    /* Coordinate conversion subroutines in wcscon.c */
-    void wcsconv(	/* Convert between coordinate systems and equinoxes */
-                 int sys1,	/* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
-                 int sys2,	/* Output coordinate system (J2000, B1950, ECLIPTIC, G ALACTIC */
-                 double eq1,	/* Input equinox (default of sys1 if 0.0) */
-                 double eq2,	/* Output equinox (default of sys2 if 0.0) */
-                 double ep1,	/* Input Besselian epoch in years */
-                 double ep2,	/* Output Besselian epoch in years */
-                 double *dtheta,	/* Longitude or right ascension in degrees
-                                     Input in sys1, returned in sys2 */
-                 double *dphi,	/* Latitude or declination in degrees
-                                 Input in sys1, returned in sys2 */
-                 double *ptheta,	/* Longitude or right ascension proper motion in deg/year
-                                     Input in sys1, returned in sys2 */
-                 double *pphi,	/* Latitude or declination proper motion in deg/year */
-                 double *px,	/* Parallax in arcseconds */
-                 double *rv);	/* Radial velocity in km/sec */
-    void wcsconp(	/* Convert between coordinate systems and equinoxes */
-                 int sys1,	/* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
-                 int sys2,	/* Output coordinate system (J2000, B1950, ECLIPTIC, G ALACTIC */
-                 double eq1,	/* Input equinox (default of sys1 if 0.0) */
-                 double eq2,	/* Output equinox (default of sys2 if 0.0) */
-                 double ep1,	/* Input Besselian epoch in years */
-                 double ep2,	/* Output Besselian epoch in years */
-                 double *dtheta,	/* Longitude or right ascension in degrees
-                                     Input in sys1, returned in sys2 */
-                 double *dphi,	/* Latitude or declination in degrees
-                                 Input in sys1, returned in sys2 */
-                 double *ptheta,	/* Longitude or right ascension proper motion in degrees/year
-                                     Input in sys1, returned in sys2 */
-                 double *pphi);	/* Latitude or declination proper motion in degrees/year
-                                 Input in sys1, returned in sys2 */
-    void wcscon(	/* Convert between coordinate systems and equinoxes */
-                int sys1,	/* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
+    /* wcsconp - Convert between coordinate systems and equinoxes */
+    void WcsConp(int coordsys_in,	/* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
+                 int coordsys_out,	/* Output coordinate system (J2000, B1950, ECLIPTIC, G ALACTIC */
+                 double equinox_in,	/* Input equinox (default of coordsys_in if 0.0) */
+                 double equinox_out,/* Output equinox (default of coordsys_out if 0.0) */
+                 double epoch_in,	/* Input Besselian epoch in years */
+                 double epoch_out,	/* Output Besselian epoch in years */
+                 double *x_coord,	/* Longitude or right ascension in degrees
+                                     Input in coordsys_in, returned in coordsys_out */
+                 double *y_coord,	/* Latitude or declination in degrees
+                                     Input in coordsys_in, returned in coordsys_out */
+                 double *x_coord_proper_motion,	/* Longitude or right ascension proper motion in degrees/year
+                                                 Input in coordsys_in, returned in coordsys_out */
+                 double *y_coord_proper_motion);/* Latitude or declination proper motion in degrees/year
+                                                 Input in coordsys_in, returned in coordsys_out */
+    
+    /* wcscon - Convert between coordinate systems and equinoxes */
+    void WcsCon(int sys1,	/* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
                 int sys2,	/* Output coordinate system (J2000, B1950, ECLIPTIC, G ALACTIC */
                 double eq1,	/* Input equinox (default of sys1 if 0.0) */
                 double eq2,	/* Output equinox (default of sys2 if 0.0) */
@@ -266,14 +269,22 @@ public :
                 double *dphi,	/* Latitude or declination in degrees
                                  Input in sys1, returned in sys2 */
                 double epoch);	/* Besselian epoch in years */
-    void fk425e (	/* Convert B1950(FK4) to J2000(FK5) coordinates */
-                 double *ra,	/* Right ascension in degrees (B1950 in, J2000 out) */
+    
+    /* fk425e - Convert B1950(FK4) to J2000(FK5) coordinates */
+    void FK4to5e(double *ra,	/* Right ascension in degrees (B1950 in, J2000 out) */
                  double *dec,	/* Declination in degrees (B1950 in, J2000 out) */
                  double epoch);	/* Besselian epoch in years */
-    void fk524e (	/* Convert J2000(FK5) to B1950(FK4) coordinates */
-                 double *ra,	/* Right ascension in degrees (J2000 in, B1950 out) */
+    
+    /* fk524e - Convert J2000(FK5) to B1950(FK4) coordinates */
+    void FK5to4e(double *ra,	/* Right ascension in degrees (J2000 in, B1950 out) */
                  double *dec,	/* Declination in degrees (J2000 in, B1950 out) */
                  double epoch);	/* Besselian epoch in years */
+    
+    /***********************************************
+     * BELOW HERE ARE METHODS WHICH HAVE NOT CURRENTLY
+     * BEEN IMPLEMENTED AS METHODS OF WcsHandler
+     ***********************************************/
+    
     int wcscsys(	/* Return code for coordinate system in string */
                 char *coorsys);	 /* Coordinate system (B1950, J2000, etc) */
     double wcsceq (	/* Set equinox from string (return 0.0 if not obvious) */

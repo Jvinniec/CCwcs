@@ -49,8 +49,7 @@ WcsHandler::WcsHandler(double cra,      /* Center right ascension in degrees */
                        const std::string& proj) /* Projection */
 {
     // Create the char* object
-    char* cproj = new char[proj.length() + 1];
-    std::strcpy(cproj, proj.c_str()) ;
+    char* cproj = str2char(proj) ;
     
     // Now do the wcs initialization
     wcs_ = wcsxinit(cra, cdec, secpix, xrpix, yrpix, nxpix, nypix,
@@ -78,11 +77,9 @@ WcsHandler::WcsHandler(int naxis1,	/* Number of pixels along x-axis */
                        double epoch) 	/* Epoch of coordinates, for FK4/FK5 conversion */
 {
     // Create the char* objects
-    char* cctype1 = new char[ctype1.length() + 1];
-    char* cctype2 = new char[ctype2.length() + 1];
-    std::strcpy(cctype1, ctype1.c_str()) ;
-    std::strcpy(cctype2, ctype2.c_str()) ;
-    
+    char* cctype1 = str2char(ctype1) ;
+    char* cctype2 = str2char(ctype2) ;
+
     // Now do the wcs initialization
     wcs_ = wcskinit(naxis1, naxis2, cctype1, cctype2,
                     crpix1, crpix2, crval1, crval2, cd, cdelt1, cdelt2,
@@ -287,7 +284,7 @@ void WcsHandler::ShiftImageCenter(double new_center_ra,     /* New center right 
                                   double new_center_dec,	/* New center declination in degrees */
                                   const std::string& coordsys) /* FK4 or FK5 coordinates (1950 or 2000) */
 {
-    char* ccoordsys = new char[coordsys.length() + 1] ;
+    char* ccoordsys = str2char(coordsys) ;
     wcsshift(wcs_, new_center_ra, new_center_dec, ccoordsys) ;
     delete[] ccoordsys ;
 }
@@ -387,10 +384,8 @@ void WcsHandler::SetScalingRotation(double cdelt1,	/* degrees/pixel in first axi
 /* setwcserr - Set WCS error message for later printing */
 void WcsHandler::SetErrorMessage(const std::string& ErrMsg)
 {
-    char* cErrMsg = new char[ErrMsg.length()+1] ;
-    std::strcpy(cErrMsg, ErrMsg.c_str()) ;
+    char* cErrMsg = str2char(ErrMsg) ;
     setwcserr(cErrMsg) ;
-    
     delete[] cErrMsg ;
 }
 
@@ -400,8 +395,7 @@ void WcsHandler::SetErrorMessage(const std::string& ErrMsg)
 void WcsHandler::SetWcsOutInit(const std::string& coord_sys)
 /* coord_sys - Coordinate system (B1950, J2000, etc) */
 {
-    char* c_coord_sys = new char[coord_sys.length()+1] ;
-    std::strcpy(c_coord_sys, coord_sys.c_str()) ;
+    char* c_coord_sys = str2char(coord_sys) ;
     wcsoutinit(wcs_, c_coord_sys) ;
     delete[] c_coord_sys ;
 }
@@ -412,8 +406,7 @@ void WcsHandler::SetWcsOutInit(const std::string& coord_sys)
 void WcsHandler::WcsInInit(const std::string& coord_sys)
 /* coord_sys - Coordinate system (B1950, J2000, etc) */
 {
-    char* c_coord_sys = new char[coord_sys.length()+1] ;
-    std::strcpy(c_coord_sys, coord_sys.c_str()) ;
+    char* c_coord_sys = str2char(coord_sys) ;
     wcsininit(wcs_, c_coord_sys) ;
     delete[] c_coord_sys ;
 }
@@ -449,11 +442,8 @@ int WcsHandler::WcsReset(double crpix1,	/* Horizontal reference pixel */
 void WcsHandler::WcsComInit(int i,                      /* Number of command (0-9) to initialize */
                             const std::string& command) /* command with %s where coordinates will go */
 {
-    char* com = new char[command.length()+1] ;
-    std::strcpy(com, command.c_str()) ;
-    
+    char* com = str2char(command) ;
     wcscominit(wcs_, i, com) ;
-    
     delete[] com ;
 }
 
@@ -466,13 +456,9 @@ void WcsHandler::WcsCom(int i,                          /* Number of command (0-
             double yfile,                   /* Vertical image pixel coordinates for WCS command */
             const std::string& wcstring)   /* WCS String from pix2wcst() */
 {
-    char* cfilename = new char[filename.length()+1] ;
-    char* cwcstring = new char[wcstring.length()+1] ;
-    std::strcpy(cfilename, filename.c_str()) ;
-    std::strcpy(cwcstring, wcstring.c_str()) ;
-    
+    char* cfilename = str2char(filename) ;
+    char* cwcstring = str2char(wcstring) ;
     wcscom(wcs_, i, cfilename, xfile, yfile, cwcstring) ;
-    
     delete[] cfilename ;
     delete[] cwcstring ;
 }
@@ -484,11 +470,8 @@ void WcsHandler::WcsCom(int i,                          /* Number of command (0-
 void WcsHandler::SaveWcsCom(int i,                      /* i of 10 possible shell commands */
                             const std::string& wcscom)  /* Shell command using output WCS string */
 {
-    char* cwcscom = new char[wcscom.length()+1] ;
-    std::strcpy(cwcscom, wcscom.c_str()) ;
-    
+    char* cwcscom = str2char(wcscom) ;
     savewcscom(i, cwcscom) ;
- 
     delete[] cwcscom ;
 }
 
@@ -497,11 +480,8 @@ void WcsHandler::SaveWcsCom(int i,                      /* i of 10 possible shel
 /* setwcsfile - Set filename for WCS error message */
 void WcsHandler::SetWcsFile(const std::string& filename)
 {
-    char* cfilename = new char[filename.length()+1] ;
-    std::strcpy(cfilename, filename.c_str()) ;
-    
+    char* cfilename = str2char(filename) ;
     setwcsfile(cfilename) ;
-    
     delete[] cfilename ;
 }
 
@@ -512,11 +492,8 @@ void WcsHandler::SetWcsFile(const std::string& filename)
 int WcsHandler::CpWcs(const std::string& header,    /* Pointer to start of FITS header */
                       const std::string& swcs)      /* Keyword suffix character for output WCS */
 {
-    char* cwcs = new char[swcs.length()+1] ;
-    std::strcpy(cwcs, swcs.c_str()) ;
-    
-    char* cheader = new char[header.length()+1] ;
-    std::strcpy(cheader, header.c_str()) ;
+    char* cwcs = str2char(swcs) ;
+    char* cheader = str2char(header) ;
     
     int ret = cpwcs(&cheader, cwcs) ;
     
@@ -525,5 +502,155 @@ int WcsHandler::CpWcs(const std::string& header,    /* Pointer to start of FITS 
     
     return ret ;
 }
+
+
+//_________________________________________________
+/* savewcscoor - Save output coordinate system */
+void WcsHandler::SaveWcsCoor(const std::string& wcscoor) /* coordinate system (J2000, B1950, galactic) */
+{
+    char* cwcscoor = new char[wcscoor.length()+1] ;
+    std::strcpy(cwcscoor, wcscoor.c_str()) ;
+    
+    savewcscoor(cwcscoor) ;
+    
+    delete[] cwcscoor ;
+}
+
+
+//_________________________________________________
+/* getwcscoor - Return output coordinate system */
+std::string WcsHandler::GetWcsCoor()
+{
+    return std::string(getwcscoor()) ;
+}
+
+
+/* Coordinate conversion subroutines in wcscon.c */
+
+//_________________________________________________
+/* wcsconv - Convert between coordinate systems and equinoxes */
+void WcsHandler::WcsConv(int coordsys_in,       /* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
+                         int coordsys_out,      /* Output coordinate system (J2000, B1950, ECLIPTIC, G ALACTIC */
+                         double equinox_in,     /* Input equinox (default of coordsys_in if 0.0) */
+                         double equinox_out,	/* Output equinox (default of coordsys_out if 0.0) */
+                         double epoch_in,       /* Input Besselian epoch in years */
+                         double epoch_out,      /* Output Besselian epoch in years */
+                         double *x_coord,       /* Longitude or right ascension in degrees
+                                                 Input in sys1, returned in sys2 */
+                         double *y_coord,       /* Latitude or declination in degrees
+                                                 Input in coordsys_in, returned in coordsys_out */
+                         double *x_coord_proper_motion,/* Longitude or right ascension proper motion in deg/year
+                                                        Input in coordsys_in, returned in coordsys_out */
+                         double *y_coord_proper_motion,	/* Latitude or declination proper motion in deg/year */
+                         double *parallax,      /* Parallax in arcseconds */
+                         double *rad_velocity)	/* Radial velocity in km/sec */
+{
+    // Access the underlying function
+    wcsconv(coordsys_in, coordsys_out,
+            equinox_in, equinox_out,
+            epoch_in, epoch_out,
+            x_coord, y_coord,
+            x_coord_proper_motion, y_coord_proper_motion,
+            parallax, rad_velocity) ;
+}
+
+
+//_________________________________________________
+/* wcsconp - Convert between coordinate systems and equinoxes */
+void WcsHandler::WcsConp(int coordsys_in,	/* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
+                         int coordsys_out,	/* Output coordinate system (J2000, B1950, ECLIPTIC, G ALACTIC */
+                         double equinox_in,	/* Input equinox (default of coordsys_in if 0.0) */
+                         double equinox_out,/* Output equinox (default of coordsys_out if 0.0) */
+                         double epoch_in,	/* Input Besselian epoch in years */
+                         double epoch_out,	/* Output Besselian epoch in years */
+                         double *x_coord,	/* Longitude or right ascension in degrees
+                                             Input in coordsys_in, returned in coordsys_out */
+                         double *y_coord,	/* Latitude or declination in degrees
+                                             Input in coordsys_in, returned in coordsys_out */
+                         double *x_coord_proper_motion,	/* Longitude or right ascension proper motion in degrees/year
+                                                         Input in coordsys_in, returned in coordsys_out */
+                         double *y_coord_proper_motion) /* Latitude or declination proper motion in degrees/year
+                                                         Input in coordsys_in, returned in coordsys_out */
+{
+    // Access the underlying function (wcsconp)
+    wcsconp(coordsys_in, coordsys_out,
+            equinox_in, equinox_out,
+            epoch_in, epoch_out,
+            x_coord, y_coord,
+            x_coord_proper_motion, y_coord_proper_motion) ;
+}
+
+
+//_________________________________________________
+/* wcscon - Convert between coordinate systems and equinoxes */
+void WcsHandler::WcsCon(int coordsys_in,	/* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
+                        int coordsys_out,	/* Output coordinate system (J2000, B1950, ECLIPTIC, G ALACTIC */
+                        double equinox_in,	/* Input equinox (default of coordsys_in if 0.0) */
+                        double equinox_out, /* Output equinox (default of coordsys_out if 0.0) */
+                        double *x_coord,	/* Longitude or right ascension in degrees
+                                             Input in coordsys_in, returned in coordsys_out */
+                        double *y_coord,	/* Latitude or declination in degrees
+                                             Input in coordsys_in, returned in coordsys_out */
+                        double epoch)       /* Besselian epoch in years */
+{
+    // Access the underlying function (wcscon)
+    wcscon(coordsys_in, coordsys_out,
+           equinox_in, equinox_out,
+           x_coord, y_coord, epoch) ;
+}
+
+
+//_________________________________________________
+/* fk425e - Convert B1950(FK4) to J2000(FK5) coordinates */
+void WcsHandler::FK4to5e(double *ra,	/* Right ascension in degrees (B1950 in, J2000 out) */
+                         double *dec,	/* Declination in degrees (B1950 in, J2000 out) */
+                         double epoch)	/* Besselian epoch in years */
+{
+    // Access the underlying function (fk425e)
+    fk425e(ra, dec, epoch) ;
+}
+
+
+//_________________________________________________
+/* fk524e - Convert J2000(FK5) to B1950(FK4) coordinates */
+void WcsHandler::FK5to4e(double *ra,	/* Right ascension in degrees (J2000 in, B1950 out) */
+                         double *dec,	/* Declination in degrees (J2000 in, B1950 out) */
+                         double epoch)	/* Besselian epoch in years */
+{
+    // Access the underlying function (fk524e)
+    fk524e(ra, dec, epoch) ;
+}
+
+
+int wcscsys(	/* Return code for coordinate system in string */
+            char *coorsys);	 /* Coordinate system (B1950, J2000, etc) */
+double wcsceq (	/* Set equinox from string (return 0.0 if not obvious) */
+               char *wcstring);  /* Coordinate system (B1950, J2000, etc) */
+void wcscstr (	/* Set coordinate system type string from system and equinox */
+              char   *cstr,	 /* Coordinate system string (returned) */
+              int    syswcs,	/* Coordinate system code */
+              double equinox,	/* Equinox of coordinate system */
+              double epoch);	/* Epoch of coordinate system */
+void d2v3 (		/* Convert RA and Dec in degrees and distance to vector */
+           double	rra,	/* Right ascension in degrees */
+           double	rdec,	/* Declination in degrees */
+           double	r,	/* Distance to object in same units as pos */
+           double pos[3]);	/* x,y,z geocentric equatorial position of object (returned) */
+void s2v3 (		/* Convert RA and Dec in radians and distance to vector */
+           double	rra,	/* Right ascension in radians */
+           double	rdec,	/* Declination in radians */
+           double	r,	/* Distance to object in same units as pos */
+           double pos[3]);	/* x,y,z geocentric equatorial position of object (returned) */
+void v2d3 (		/* Convert vector to RA and Dec in degrees and distance */
+           double	pos[3],	/* x,y,z geocentric equatorial position of object */
+           double	*rra,	/* Right ascension in degrees (returned) */
+           double	*rdec,	/* Declination in degrees (returned) */
+           double	*r);	/* Distance to object in same units as pos (returned) */
+void v2s3 (		/* Convert vector to RA and Dec in radians and distance */
+           double	pos[3],	/* x,y,z geocentric equatorial position of object */
+           double	*rra,	/* Right ascension in radians (returned) */
+           double	*rdec,	/* Declination in radians (returned) */
+           double	*r);	/* Distance to object in same units as pos (returned) */
+
 
 # pragma mark - Protected Methods
