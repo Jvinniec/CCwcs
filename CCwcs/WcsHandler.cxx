@@ -525,7 +525,10 @@ std::string WcsHandler::GetWcsCoor()
 }
 
 
-/* Coordinate conversion subroutines in wcscon.c */
+#pragma mark - Coordinate conversion subroutines in wcscon.c
+/***********************************************
+ * Coordinate conversion subroutines in wcscon.c
+ ***********************************************/
 
 //_________________________________________________
 /* wcsconv - Convert between coordinate systems and equinoxes */
@@ -646,7 +649,7 @@ double WcsHandler::WcsCeq(const std::string& wcstring)  /* Coordinate system (B1
 
 //_________________________________________________
 /* wcscstr - Set coordinate system type string from system and equinox */
-std::string WcsCstr(/* Coordinate system string (returned) */
+std::string WcsHandler::WcsCstr(/* Coordinate system string (returned) */
                     int    coord_sys_code,	/* Coordinate system code */
                     double equinox,        /* Equinox of coordinate system */
                     double epoch)          /* Epoch of coordinate system */
@@ -660,7 +663,7 @@ std::string WcsCstr(/* Coordinate system string (returned) */
 //_________________________________________________
 /* d2v3 - Convert RA and Dec in degrees and distance to vector */
 /* x,y,z geocentric equatorial position of object (returned) */
-std::vector<double> D2v3(double	rra,	/* Right ascension in degrees */
+std::vector<double> WcsHandler::D2v3(double	rra,	/* Right ascension in degrees */
                          double	rdec,	/* Declination in degrees */
                          double	r)      /* Distance to object in same units as pos */
 {
@@ -673,7 +676,7 @@ std::vector<double> D2v3(double	rra,	/* Right ascension in degrees */
 //_________________________________________________
 /* s2v3 - Convert RA and Dec in radians and distance to vector */
 /* x,y,z geocentric equatorial position of object (returned) */
-std::vector<double> S2v3(double	rra,	/* Right ascension in radians */
+std::vector<double> WcsHandler::S2v3(double	rra,	/* Right ascension in radians */
                          double	rdec,	/* Declination in radians */
                          double	r)      /* Distance to object in same units as pos */
 {
@@ -685,7 +688,7 @@ std::vector<double> S2v3(double	rra,	/* Right ascension in radians */
 
 //_________________________________________________
 /* v2d3 - Convert vector to RA and Dec in degrees and distance */
-void V2d3(std::vector<double> pos,  /* x,y,z geocentric equatorial position of object */
+void WcsHandler::V2d3(std::vector<double> pos,  /* x,y,z geocentric equatorial position of object */
           double	*rra,           /* Right ascension in degrees (returned) */
           double	*rdec,          /* Declination in degrees (returned) */
           double	*r)             /* Distance to object in same units as pos (returned) */
@@ -696,12 +699,69 @@ void V2d3(std::vector<double> pos,  /* x,y,z geocentric equatorial position of o
 
 //_________________________________________________
 /* v2s3 - Convert vector to RA and Dec in radians and distance */
-void V2s3(std::vector<double> pos,	/* x,y,z geocentric equatorial position of object */
-          double	*rra,           /* Right ascension in radians (returned) */
-          double	*rdec,          /* Declination in radians (returned) */
-          double	*r)             /* Distance to object in same units as pos (returned) */
+void WcsHandler::V2s3(std::vector<double> pos,	/* x,y,z geocentric equatorial position of object */
+                      double	*rra,           /* Right ascension in radians (returned) */
+                      double	*rdec,          /* Declination in radians (returned) */
+                      double	*r)             /* Distance to object in same units as pos (returned) */
 {
     v2s3(&pos[0], rra, rdec, r) ;
+}
+
+
+#pragma mark - Distortion model subroutines in distort.c
+/***********************************************
+ * Distortion model subroutines in distort.c
+ ***********************************************/
+
+//_________________________________________________
+/* distortinit - Set distortion coefficients from FITS header */
+void WcsHandler::DistortInit(const std::string& hstring) /* FITS header */
+{
+    distortinit(wcs_, hstring.c_str()) ;
+}
+
+
+//_________________________________________________
+/* setdistcode - Set WCS distortion code string from CTYPEi value */
+void WcsHandler::SetDistCode(const std::string& header_ctype) /* CTYPE value from FITS header */
+{
+    char* c_header_ctype = str2char(header_ctype) ;
+    setdistcode(wcs_, c_header_ctype) ;
+    delete[] c_header_ctype ;
+}
+
+
+//_________________________________________________
+/* DelDistort - Delete all distortion-related fields */
+int WcsHandler::DeleteDistort(const std::string& header,    /* FITS header */
+                  int verbose)                 /* If !=0, print keywords as deleted */
+{
+    char* cheader = str2char(header) ;
+    int ret = DelDistort(cheader, verbose) ;
+    delete[] cheader ;
+    return ret ;
+}
+
+
+//_________________________________________________
+/* pix2foc - Convert pixel to focal plane coordinates */
+void WcsHandler::Pix2Foc(double x_pixel_coord,	/* Image pixel horizontal coordinate */
+                         double y_pixel_coord,	/* Image pixel vertical coordinate */
+                         double *x_focal_plane,	/* Focal plane horizontal coordinate(returned) */
+                         double *y_focal_plane) /* Focal plane vertical coordinate (returned) */
+{
+    pix2foc(wcs_, x_pixel_coord, y_pixel_coord, x_focal_plane, y_focal_plane) ;
+}
+
+
+//_________________________________________________
+/* foc2pix - Convert focal plane to pixel coordinates */
+void WcsHandler::Foc2Pix(double x_focal_plane,	/* Focal plane horizontal coordinate(returned) */
+                         double y_focal_plane,  /* Focal plane vertical coordinate (returned) */
+                         double *x_pixel_coord,	/* Image pixel horizontal coordinate */
+                         double *y_pixel_coord) /* Image pixel vertical coordinate */
+{
+    foc2pix(wcs_, x_focal_plane, y_focal_plane, x_pixel_coord, y_pixel_coord) ;
 }
 
 # pragma mark - Protected Methods

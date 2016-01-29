@@ -225,7 +225,6 @@ public :
      * Coordinate conversion subroutines in wcscon.c
      ***********************************************/
 
-    
     /* wcsconv - Convert between coordinate systems and equinoxes */
     void WcsConv(int coordsys_in,       /* Input coordinate system (J2000, B1950, ECLIPTIC, GALACTIC */
                  int coordsys_out,      /* Output coordinate system (J2000, B1950, ECLIPTIC, G ALACTIC */
@@ -319,39 +318,43 @@ public :
               double	*r);            /* Distance to object in same units as pos (returned) */
     
     /***********************************************
-     * BELOW HERE ARE METHODS WHICH HAVE NOT CURRENTLY
-     * BEEN IMPLEMENTED AS METHODS OF WcsHandler
-     ***********************************************/
-    
-    /***********************************************
      * Distortion model subroutines in distort.c
      ***********************************************/
 
-    void distortinit (	/* Set distortion coefficients from FITS header */
-                      struct WorldCoor *wcs,	/* World coordinate system structure */
-                      const char* hstring);	/* FITS header */
-    void setdistcode (	/* Set WCS distortion code string from CTYPEi value */
-                      struct WorldCoor *wcs,	/* World coordinate system structure */
-                      char	*ctype);	/* CTYPE value from FITS header */
-    char *getdistcode (	/* Return distortion code string for CTYPEi */
-                       struct WorldCoor *wcs);	/* World coordinate system structure */
-    int DelDistort (	/* Delete all distortion-related fields */
-                    char *header,	/* FITS header */
-                    int verbose);	/* If !=0, print keywords as deleted */
-    void pix2foc (	/* Convert pixel to focal plane coordinates */
-                  struct WorldCoor *wcs,	/* World coordinate system structure */
-                  double x,	/* Image pixel horizontal coordinate */
-                  double y,	/* Image pixel vertical coordinate */
-                  double *u,	/* Focal plane horizontal coordinate(returned) */
-                  double *v);	/* Focal plane vertical coordinate (returned) */
-    void foc2pix (	/* Convert focal plane to pixel coordinates */
-                  struct WorldCoor *wcs,	/* World coordinate system structure */
-                  double u,	/* Focal plane horizontal coordinate */
-                  double v,	/* Focal plane vertical coordinate */
-                  double *x,	/* Image pixel horizontal coordinate(returned) */
-                  double *y);	/* Image pixel vertical coordinate (returned) */
+    /* distortinit - Set distortion coefficients from FITS header */
+    void DistortInit(const std::string& hstring); /* FITS header */
+
+    /* setdistcode - Set WCS distortion code string from CTYPEi value */
+    void SetDistCode(const std::string& header_ctype) ; /* CTYPE value from FITS header */
+
+    /* getdistcode - Return distortion code string for CTYPEi */
+    std::string GetDistCode() {return std::string(getdistcode(wcs_)) ;}
     
-    /* Other projection subroutines */
+    
+    /* DelDistort - Delete all distortion-related fields */
+    int DeleteDistort(const std::string& header,    /* FITS header */
+                      int verbose) ;                /* If !=0, print keywords as deleted */
+    
+    /* pix2foc - Convert pixel to focal plane coordinates */
+    void Pix2Foc(double x_pixel_coord,	/* Image pixel horizontal coordinate */
+                 double y_pixel_coord,	/* Image pixel vertical coordinate */
+                 double *x_focal_plane,	/* Focal plane horizontal coordinate(returned) */
+                 double *y_focal_plane);/* Focal plane vertical coordinate (returned) */
+    
+    /* foc2pix - Convert focal plane to pixel coordinates */
+    void Foc2Pix(double x_focal_plane,	/* Focal plane horizontal coordinate(returned) */
+                 double y_focal_plane,  /* Focal plane vertical coordinate (returned) */
+                 double *x_pixel_coord,	/* Image pixel horizontal coordinate */
+                 double *y_pixel_coord);/* Image pixel vertical coordinate */
+    
+    /***********************************************
+     * Other projection subroutines
+     ***********************************************/
+    
+    /***********************************************
+     * BELOW HERE ARE METHODS WHICH HAVE NOT CURRENTLY
+     * BEEN IMPLEMENTED AS METHODS OF WcsHandler
+     ***********************************************/
     
     /* 8 projections using AIPS algorithms (worldpos.c) */
     int worldpos (	/* Convert from pixel location to RA,Dec */
