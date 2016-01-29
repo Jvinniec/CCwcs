@@ -488,7 +488,7 @@ void WcsHandler::SaveWcsCom(int i,                      /* i of 10 possible shel
     std::strcpy(cwcscom, wcscom.c_str()) ;
     
     savewcscom(i, cwcscom) ;
-    
+ 
     delete[] cwcscom ;
 }
 
@@ -506,13 +506,24 @@ void WcsHandler::SetWcsFile(const std::string& filename)
 }
 
 
+
+//_________________________________________________
 /* cpwcs - Copy WCS keywords with no suffix to ones with suffix */
-           char **header,	/* Pointer to start of FITS header */
-           char *cwcs);	/* Keyword suffix character for output WCS */
-int CpWcs(const std::string& header,
-          const std::string& cwcs)
+int WcsHandler::CpWcs(const std::string& header,    /* Pointer to start of FITS header */
+                      const std::string& swcs)      /* Keyword suffix character for output WCS */
 {
+    char* cwcs = new char[swcs.length()+1] ;
+    std::strcpy(cwcs, swcs.c_str()) ;
     
+    char* cheader = new char[header.length()+1] ;
+    std::strcpy(cheader, header.c_str()) ;
+    
+    int ret = cpwcs(&cheader, cwcs) ;
+    
+    delete[] cwcs ;
+    delete[] cheader ;
+    
+    return ret ;
 }
 
 # pragma mark - Protected Methods

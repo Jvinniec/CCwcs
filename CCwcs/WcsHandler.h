@@ -208,19 +208,17 @@ public :
     /* freewcscom - Free memory storing WCS shell commands */
     void FreeWcsCom() {freewcscom(wcs_) ;}
     
+    /* setwcsfile - Set filename for WCS error message */
+    void SetWcsFile(const std::string& filename) ; /* FITS or IRAF file name */
+    
+    /* cpwcs - Copy WCS keywords with no suffix to ones with suffix */
+    int CpWcs(const std::string& header,    /* Pointer to start of FITS header */
+              const std::string& cwcs) ;    /* Keyword suffix character for output WCS */
+    
     /***********************************************
      * BELOW HERE ARE METHODS WHICH HAVE NOT CURRENTLY
      * BEEN IMPLEMENTED AS METHODS OF WcsHandler
      ***********************************************/
-    
-    /* setwcsfile - Set filename for WCS error message */
-    void SetWcsFile(const std::string& filename) ; /* FITS or IRAF file name */
-    
-    int cpwcs (		/* Copy WCS keywords with no suffix to ones with suffix */
-               char **header,	/* Pointer to start of FITS header */
-               char *cwcs);	/* Keyword suffix character for output WCS */
-    int CpWcs(const std::string& header,
-              const std::string& cwcs) ;
     
     void savewcscoor(	/* Save output coordinate system */
                      char *wcscoor);	/* coordinate system (J2000, B1950, galactic) */
