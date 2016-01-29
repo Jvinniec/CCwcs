@@ -304,7 +304,6 @@ public :
                              double	rdec,	/* Declination in radians */
                              double	r);     /* Distance to object in same units as pos */
     
-    
     /* v2d3 - Convert vector to RA and Dec in degrees and distance */
     void V2d3(std::vector<double> pos,  /* x,y,z geocentric equatorial position of object */
               double	*rra,           /* Right ascension in degrees (returned) */
@@ -406,13 +405,11 @@ public :
     /* Returns a string that represents the new header value */
     std::string SetFitsPlate(const std::string& header) ; /* Current image FITS header */
     
-    
     /* SetPlate - Set plate fit coefficients in structure from arguments */
     int SetPlateCoeff(int ncoeff1,	/* Number of coefficients for x */
                       int ncoeff2,	/* Number of coefficients for y */
                       std::vector<double> coeff)	/* Plate fit coefficients */
         {return SetPlate(wcs_, ncoeff1, ncoeff2, &coeff[0]) ;}
-    
     
     /* GetPlate - Return plate fit coefficients from structure in arguments */
     int GetPlateCoeff(int *ncoeff1,	/* Number of coefficients for x */

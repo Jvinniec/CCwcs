@@ -15,7 +15,6 @@
 //      code.
 
 #include <iterator>
-
 #include "WcsHandler.h"
 
 # pragma mark - Constructors/Destructors
@@ -508,11 +507,8 @@ int WcsHandler::CpWcs(const std::string& header,    /* Pointer to start of FITS 
 /* savewcscoor - Save output coordinate system */
 void WcsHandler::SaveWcsCoor(const std::string& wcscoor) /* coordinate system (J2000, B1950, galactic) */
 {
-    char* cwcscoor = new char[wcscoor.length()+1] ;
-    std::strcpy(cwcscoor, wcscoor.c_str()) ;
-    
+    char* cwcscoor = str2char(wcscoor) ;
     savewcscoor(cwcscoor) ;
-    
     delete[] cwcscoor ;
 }
 
@@ -811,6 +807,8 @@ int WcsHandler::GetPlateCoeff(int *ncoeff1,	/* Number of coefficients for x */
 # pragma mark - Protected Methods
 
 //_________________________________________________
+/* Method for converting a string into a 'char*'. Note that this is a 'char*' which
+ * is required by the methods in wcstools, not a 'const char*'. */
 char* str2char(const std::string& str)
 {
     char* cstr = new char[str.length()+1] ;
