@@ -1030,7 +1030,7 @@ int WcsHandler::GetPlateCoeff(int *ncoeff1,	/* Number of coefficients for x */
 //_________________________________________________
 /* Method for converting a string into a 'char*'. Note that this is a 'char*' which
  * is required by the methods in wcstools, not a 'const char*'. */
-char* str2char(const std::string& str)
+char* WcsHandler::str2char(const std::string& str)
 {
     char* cstr = new char[str.length()+1] ;
     std::strcpy(cstr, str.c_str()) ;
