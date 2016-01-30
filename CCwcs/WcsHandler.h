@@ -45,7 +45,7 @@ public :
                double crpix2,	/* Reference pixel coordinates */
                double crval1,	/* Coordinate at reference pixel in degrees */
                double crval2,	/* Coordinate at reference pixel in degrees */
-               double *cd,      /* Rotation matrix, used if not NULL */
+               std::vector<double> cd,      /* Rotation matrix, used if not NULL */
                double cdelt1,	/* scale in degrees/pixel, if cd is NULL */
                double cdelt2,	/* scale in degrees/pixel, if cd is NULL */
                double crota,	/* Rotation angle in degrees, if cd is NULL */
@@ -66,19 +66,126 @@ public :
     // Return a separate copy of the contained WCS object
     WorldCoor* cloneWCS() const ;
     
+    /**************************************************************************
+     * Static methods for doing coordinate conversions
+     **************************************************************************/
+    
     // Some useful methods for converting coordinates between systems
-    static void Celestial2Galactic() {} ;
-    static void Galactic2Celestial() {} ;
-    static void Coordinate2Projected() {} ;
+    static void Celestial2Galactic(double* x_coord,  /* RA (deg) to be converted to Galactic Longitude (degrees) */
+                                   double* y_coord,  /* Dec (deg) to be converted to Galactic Latitude (degrees) */
+                                   double celestial_equinox=0.0,
+                                   double galactic_equinox=0.0,
+                                   double epoch=2000.0) ;
+                                   
+    static void Galactic2Celestial(double* x_coord,  /* Galactic Longitude (deg) to be converted to RA (degrees) */
+                                   double* y_coord,  /* Galactic Latitude (deg) to be converted to Dec (degrees) */
+                                   double celestial_equinox=0.0,
+                                   double galactic_equinox=0.0,
+                                   double epoch=2000.0) ;
+    
+    /* Note that in all Coordinate2Projected methods, the returned xproj,yprox are in degrees */
+    static void Coordinate2Projected(double xcoord,                 /* Input Longitude/RA */
+                                     double ycoord,                 /* Input Latitude/Dec */
+                                     double xTangentPoint,          /* Longitude/RA Projection tangent point */
+                                     double yTangentPoint,          /* Latitude/Dec Projection tangent point */
+                                     double *xproj,                 /* Output x-projected coordinate */
+                                     double *yproj) ;               /* Output y-projected coordinate */
+
+    static void Coordinate2Projected(double xcoord,                 /* Input Longitude/RA */
+                                     double ycoord,                 /* Input Latitude/Dec */
+                                     double xTangentPoint,          /* Longitude/RA Projection tangent point */
+                                     double yTangentPoint,          /* Latitude/Dec Projection tangent point */
+                                     double *xproj,                 /* Output x-projected coordinate */
+                                     double *yproj,                 /* Output y-projected coordinate */
+                                     const std::string& coordSys,   /* Input coordinate system */
+                                     const std::string& projection) ;   /* projection type */
+    
+    void Coordinate2Projected(double xcoord,    /* Input Longitude/RA */
+                              double ycoord,    /* Input Latitude/Dec */
+                              double *xproj,    /* Output x-projected coordinate */
+                              double *yproj) ;  /* Output y-projected coordinate */
+    
+    /**************************************************************************
+     * Static methods for calculating angular separation between two positions
+     **************************************************************************/
     
     // Methods for getting the angular separation between two positions
-    static double AngularSeparation_Deg() {return 0.0;}
-    static double AngularSeparation_Rad() {return 0.0 ;}
+    static double AngularSeparation_Deg(double x_coord1,
+                                        double y_coord1,
+                                        double x_coord2,
+                                        double y_coord2);
     
-    // Methods ported over from wcstools ===============================
-    // Note that I've changed some of these names to make them a little more
-    // meaningful. I've also identified the corresponding method in the wcstools
+    static double AngularSeparation_Rad(double x_coord1,
+                                        double y_coord1,
+                                        double x_coord2,
+                                        double y_coord2) ;
     
+    /**************************************************************************
+     * Methods ported over from wcstools
+     * Note that I've changed some of these names to make them a little more
+     * meaningful. I've also identified the corresponding method in the wcstools
+     **************************************************************************/
+    
+    /* wcstype - Set projection type from header CTYPEs */
+    int SetWcsProjectionType(const std::string& ctype1,     /* FITS WCS projection for axis 1 */
+                             const std::string& ctype2) ;   /* FITS WCS projection for axis 2 */
+    
+    /* iswcs - Returns 1 if wcs structure set, else 0 */
+    int IsWcs() {return iswcs(wcs_) ;}
+    
+    /* nowcs - Returns 0 if wcs structure set, else 1 */
+    int NoWcs() {return nowcs(wcs_) ;}
+    
+    /* pix2wcst - Convert pixel coordinates to World Coordinate string */
+    int Pix2Wcst(double xpix,         /* Image horizontal coordinate in pixels */
+                 double ypix,         /* Image vertical coordinate in pixels */
+                 std::string& wcsstr, /* World coordinate string (returned) */
+                 int lstr);           /* Length of world coordinate string (returned) */
+    
+    /* pix2wcs - Convert pixel coordinates to World Coordinates */
+    void Pix2Wcs(double xpix,	/* Image horizontal coordinate in pixels */
+                 double ypix,	/* Image vertical coordinate in pixels */
+                 double *xpos,	/* Longitude/Right Ascension in degrees (returned) */
+                 double *ypos)	/* Latitude/Declination in degrees (returned) */
+        {return pix2wcs(wcs_, xpix, ypix, xpos, ypos) ;}
+    
+    /* wcsc2pix - Convert World Coordinates to pixel coordinates */
+    void Wcsc2Pix(double xpos,	/* Longitude/Right Ascension in degrees */
+                  double ypos,	/* Latitude/Declination in degrees */
+                  const std::string& coorsys,/* Coordinate system (B1950, J2000, etc) */
+                  double *xpix,	/* Image horizontal coordinate in pixels (returned) */
+                  double *ypix,	/* Image vertical coordinate in pixels (returned) */
+                  int *offscl);
+    
+    /* wcs2pix - Convert World Coordinates to pixel coordinates */
+    void Wcs2Pix(double xpos,	/* Longitude/Right Ascension in degrees */
+                 double ypos,	/* Latitude/Declination in degrees */
+                 double *xpix,	/* Image horizontal coordinate in pixels (returned) */
+                 double *ypix,	/* Image vertical coordinate in pixels (returned) */
+                 int *offscl);
+    
+    
+    /* wcsdist - Compute angular distance between 2 sky positions */
+    static double WcsDist(double x_coord1,	/* First longitude/right ascension in degrees */
+                          double y_coord1,	/* First latitude/declination in degrees */
+                          double x_coord2,	/* Second longitude/right ascension in degrees */
+                          double y_coord2)	/* Second latitude/declination in degrees */
+        {return wcsdist(x_coord1, y_coord1, x_coord2, y_coord2) ;}
+    
+    /* wcsdist1 - Compute angular distance between 2 sky positions */
+    static double WcsDist1(double x_coord1,	/* First longitude/right ascension in degrees */
+                           double y_coord1,	/* First latitude/declination in degrees */
+                           double x_coord2,	/* Second longitude/right ascension in degrees */
+                           double y_coord2)	/* Second latitude/declination in degrees */
+        {return wcsdist1(x_coord1, y_coord1, x_coord2, y_coord2) ;}
+    
+    /* wcsdiff - Compute angular distance between 2 sky positions */
+    static double WcsDiff(double x_coord1,	/* First longitude/right ascension in degrees */
+                          double y_coord1,	/* First latitude/declination in degrees */
+                          double x_coord2,	/* Second longitude/right ascension in degrees */
+                          double y_coord2)	/* Second latitude/declination in degrees */
+        {return wcsdiff(x_coord1, y_coord1, x_coord2, y_coord2) ;}
+
     /* wcsshift - Change center of WCS */
     void ShiftImageCenter(double new_center_ra,     /* New center right ascension in degrees */
                           double new_center_dec,	/* New center declination in degrees */

@@ -19,21 +19,21 @@
 
 # pragma mark - Constructors/Destructors
 
-//_________________________________________________
+//_____________________________________________________________________________
 // Default constructor
 WcsHandler::WcsHandler()
 {}
 
 
-//_________________________________________________
+//_____________________________________________________________________________
 // Set up WCS structure from a FITS image header
 WcsHandler::WcsHandler(const std::string& header) :
     wcs_(wcsinit(header.c_str()))
 {}
 
 
-//_________________________________________________
-// wcsxinit
+//_____________________________________________________________________________
+/* wcsxinit */
 WcsHandler::WcsHandler(double cra,      /* Center right ascension in degrees */
                        double cdec,     /* Center declination in degrees */
                        double secpix,	/* Number of arcseconds per pixel */
@@ -58,8 +58,8 @@ WcsHandler::WcsHandler(double cra,      /* Center right ascension in degrees */
 }
 
 
-//_________________________________________________
-// wcskinit
+//_____________________________________________________________________________
+/* wcskinit */
 WcsHandler::WcsHandler(int naxis1,	/* Number of pixels along x-axis */
                        int naxis2,	/* Number of pixels along y-axis */
                        const std::string& ctype1,	/* FITS WCS projection for axis 1 */
@@ -68,7 +68,7 @@ WcsHandler::WcsHandler(int naxis1,	/* Number of pixels along x-axis */
                        double crpix2,	/* Reference pixel coordinates */
                        double crval1,	/* Coordinate at reference pixel in degrees */
                        double crval2,	/* Coordinate at reference pixel in degrees */
-                       double *cd,      /* Rotation matrix, used if not NULL */
+                       std::vector<double> cd,      /* Rotation matrix, used if not NULL */
                        double cdelt1,	/* scale in degrees/pixel, if cd is NULL */
                        double cdelt2,	/* scale in degrees/pixel, if cd is NULL */
                        double crota,	/* Rotation angle in degrees, if cd is NULL */
@@ -81,7 +81,7 @@ WcsHandler::WcsHandler(int naxis1,	/* Number of pixels along x-axis */
 
     // Now do the wcs initialization
     wcs_ = wcskinit(naxis1, naxis2, cctype1, cctype2,
-                    crpix1, crpix2, crval1, crval2, cd, cdelt1, cdelt2,
+                    crpix1, crpix2, crval1, crval2, &cd[0], cdelt1, cdelt2,
                     crota, equinox, epoch) ;
     
     delete[] cctype1 ;
@@ -89,21 +89,21 @@ WcsHandler::WcsHandler(int naxis1,	/* Number of pixels along x-axis */
 }
 
 
-//_________________________________________________
+//_____________________________________________________________________________
 // Create from a WorldCoor object
 WcsHandler::WcsHandler(WorldCoor* wcs) :
     wcs_(wcs)
 {}
 
 
-//_________________________________________________
+//_____________________________________________________________________________
 // Copy constructor
 WcsHandler::WcsHandler(const WcsHandler& other) :
     wcs_(other.cloneWCS())
 {}
 
 
-//_________________________________________________
+//_____________________________________________________________________________
 // Destructor
 WcsHandler::~WcsHandler()
 {
@@ -114,7 +114,7 @@ WcsHandler::~WcsHandler()
 
 # pragma mark - Public Methods
 
-//_________________________________________________
+//_____________________________________________________________________________
 // Create a new WorldCoor object with all the same values as wcs_
 WorldCoor* WcsHandler::cloneWCS() const
 {
@@ -274,6 +274,224 @@ WorldCoor* WcsHandler::cloneWCS() const
     
     // Return the fully copied object
     return wcs_copy ;
+}
+
+/**************************************************************************
+ * Static methods for doing coordinate conversions
+ **************************************************************************/
+
+//_____________________________________________________________________________
+void WcsHandler::Celestial2Galactic(double* x_coord, /* RA (deg) to be converted to Galactic Longitude (degrees) */
+                                    double* y_coord, /* Dec (deg) to be converted to Galactic Latitude (degrees) */
+                                    double celestial_equinox,
+                                    double galactic_equinox,
+                                    double epoch)
+{
+    // Get the coordinate codes
+    int J2000_code = GetCoordSystemCode("J2000") ;
+    int Galactic_code = GetCoordSystemCode("Galactic") ;
+    
+    // Get the converted coordinates
+    WcsCon(J2000_code, Galactic_code,
+           celestial_equinox, galactic_equinox,
+           x_coord, y_coord, epoch) ;
+    
+    return ;
+}
+
+
+//_____________________________________________________________________________
+void WcsHandler::Galactic2Celestial(double* x_coord, /* Galactic Longitude (deg) to be converted to RA (degrees) */
+                                    double* y_coord, /* Galactic Latitude (deg) to be converted to Dec (degrees) */
+                                    double galactic_equinox,
+                                    double celestial_equinox,
+                                    double epoch)
+{
+    // Get the coordinate codes
+    int J2000_code = GetCoordSystemCode("J2000") ;
+    int Galactic_code = GetCoordSystemCode("Galactic") ;
+    
+    // Get the converted coordinates
+    WcsCon(Galactic_code, J2000_code,
+           galactic_equinox, celestial_equinox,
+           x_coord, y_coord, epoch) ;
+    
+    return ;
+}
+
+
+//_________________________________________________
+/**************************************************************************
+ * I'm not sure if it really matters whether we're using J2000 or Galactic
+ * coordinates for this. I would assume the projection would be the same.
+ **************************************************************************/
+void WcsHandler::Coordinate2Projected(double xcoord,                 /* Input Longitude/RA */
+                                      double ycoord,                 /* Input Latitude/Dec */
+                                      double xTangentPoint,          /* Longitude/RA Projection tangent point */
+                                      double yTangentPoint,          /* Latitude/Dec Projection tangent point */
+                                      double *xproj,                 /* Output x-projected coordinate */
+                                      double *yproj)                 /* Output y-projected coordinate */
+{
+    Coordinate2Projected(xcoord, ycoord, xTangentPoint, yTangentPoint,
+                      xproj, yproj, "J2000", "TAN") ;
+}
+
+
+//_____________________________________________________________________________
+void WcsHandler::Coordinate2Projected(double xcoord,                 /* Input Longitude/RA */
+                                      double ycoord,                 /* Input Latitude/Dec */
+                                      double xTangentPoint,          /* Longitude/RA Projection tangent point */
+                                      double yTangentPoint,          /* Latitude/Dec Projection tangent point */
+                                      double *xproj,                 /* Output x-projected coordinate */
+                                      double *yproj,                 /* Output y-projected coordinate */
+                                      const std::string& coordSys,   /* Input coordinate system */
+                                      const std::string& projection) /* projection type */
+{
+    // Get the ctypes for the two axes (as recognized by wcslib)
+    std::string stype1, stype2 ;
+    int syscode=1;
+    if (std::strcmp(coordSys.c_str(), "J2000") == 0) {
+        stype1 = "RA" ;
+        stype2 = "DEC" ;
+    } else if (std::strcmp(coordSys.c_str(), "GALACTIC") == 0) {
+        stype1 = "GLON" ;
+        stype2 = "GLAT" ;
+        syscode = 3 ;
+    }
+    
+    // Setup the rotation matrix (the values here imply no rotation)
+    std::vector<double> cd = {-1.0, 0.0, 0.0, -1.0} ;
+    
+    // Create a WorldCoor object to handle manipulation of objects
+    WcsHandler wcshandler(0.0,	/* Number of pixels along x-axis */
+                          0.0,	/* Number of pixels along y-axis */
+                          stype1,	/* FITS WCS projection for axis 1 */
+                          stype2,	/* FITS WCS projection for axis 2 */
+                          0.0,	/* Reference pixel coordinates */
+                          0.0,	/* Reference pixel coordinates */
+                          xTangentPoint,	/* Coordinate at reference pixel in degrees */
+                          yTangentPoint,	/* Coordinate at reference pixel in degrees */
+                          cd,      /* Rotation matrix, used if not NULL */
+                          0.0,	/* scale in degrees/pixel, if cd is NULL */
+                          0.0,	/* scale in degrees/pixel, if cd is NULL */
+                          0.0,	/* Rotation angle in degrees, if cd is NULL */
+                          2000.0,     /* Equinox of coordinates, 1950 and 2000 supported */
+                          0.0) ;
+    wcshandler.SetWcsProjectionType(projection, projection) ;
+    
+    // Fill the actual objects
+    wcshandler.TnxPix(xcoord, ycoord, xproj, yproj) ;
+    
+    // Returned projected coordinates are in radians, so we must convert them to degrees
+    *xproj *= R2D ;
+    *yproj *= R2D ;
+    
+    return ;
+}
+
+
+//_____________________________________________________________________________
+/* This method is specific to this instance of WcsHandler */
+void WcsHandler::Coordinate2Projected(double xcoord,   /* Input Longitude/RA */
+                                      double ycoord,   /* Input Latitude/Dec */
+                                      double *xproj,   /* Output x-projected coordinate */
+                                      double *yproj)   /* Output y-projected coordinate */
+{
+    TnxPix(xcoord, ycoord, xproj, yproj) ;
+}
+
+/**************************************************************************
+ * Static methods for calculating angular separation between two positions
+ **************************************************************************/
+
+//_____________________________________________________________________________
+double WcsHandler::AngularSeparation_Deg(double x1coord, double y1coord,
+                                         double x2coord, double y2coord)
+{
+    // This method assumes you're passing coordinates in degrees and want the
+    // separation returned in degrees.
+    
+    // Compute the angular separation between the two points
+    return WcsDist(x1coord, y1coord, x2coord, y2coord) ;
+}
+
+
+//_____________________________________________________________________________
+double WcsHandler::AngularSeparation_Rad(double x1coord, double y1coord,
+                                         double x2coord, double y2coord)
+{
+    // This method assumes you are passing coordinates in Radians and want the
+    // separation returned in radians.
+    
+    // First convert all of the passed variables to degrees
+    x1coord *= R2D ;
+    y1coord *= R2D ;
+    x2coord *= R2D ;
+    y2coord *= R2D ;
+    
+    // Compute the angular separation between the two points
+    return D2R * WcsDist(x1coord, y1coord, x2coord, y2coord) ;
+}
+
+/**************************************************************************
+ * Methods ported over from wcstools
+ * Note that I've changed some of these names to make them a little more
+ * meaningful. I've also identified the corresponding method in the wcstools
+ **************************************************************************/
+
+//_____________________________________________________________________________
+/* pix2wcst - Convert pixel coordinates to World Coordinate string */
+int WcsHandler::Pix2Wcst(double xpix,    /* Image horizontal coordinate in pixels */
+                         double ypix,	 /* Image vertical coordinate in pixels */
+                         std::string& wcsstr, /* World coordinate string (returned) */
+                         int lstr)       /* Length of world coordinate string (returned) */
+{
+    char* wcschar = str2char(wcsstr) ;
+    int ret = pix2wcst(wcs_, xpix, ypix, wcschar, lstr) ;
+    wcsstr = std::string(wcschar) ;
+    delete[] wcschar ;
+    return ret ;
+}
+
+
+//_____________________________________________________________________________
+/* wcsc2pix - Convert World Coordinates to pixel coordinates */
+void WcsHandler::Wcsc2Pix(double xpos,	/* Longitude/Right Ascension in degrees */
+                          double ypos,	/* Latitude/Declination in degrees */
+                          const std::string& coorsys,/* Coordinate system (B1950, J2000, etc) */
+                          double *xpix,	/* Image horizontal coordinate in pixels (returned) */
+                          double *ypix,	/* Image vertical coordinate in pixels (returned) */
+                          int *offscl)
+{
+    char* c_coorsys = str2char(coorsys) ;
+    wcsc2pix(wcs_, xpos, ypos, c_coorsys, xpix, ypix, offscl) ;
+    delete[] c_coorsys ;
+}
+
+
+//_____________________________________________________________________________
+/* wcs2pix - Convert World Coordinates to pixel coordinates */
+void WcsHandler::Wcs2Pix(double xpos,	/* Longitude/Right Ascension in degrees */
+                         double ypos,	/* Latitude/Declination in degrees */
+                         double *xpix,	/* Image horizontal coordinate in pixels (returned) */
+                         double *ypix,	/* Image vertical coordinate in pixels (returned) */
+                         int *offscl)
+{
+    wcs2pix(wcs_, xpos, ypos, xpix, ypix, offscl) ;
+}
+
+//_____________________________________________________________________________
+/* wcstype - Set projection type from header CTYPEs */
+int WcsHandler::SetWcsProjectionType(const std::string& ctype1,   /* FITS WCS projection for axis 1 */
+                                     const std::string& ctype2)   /* FITS WCS projection for axis 2 */
+{
+    char* c_ctype1 = str2char(ctype1) ;
+    char* c_ctype2 = str2char(ctype2) ;
+    int ret = wcstype(wcs_, c_ctype1, c_ctype2) ;
+    delete[] c_ctype1 ;
+    delete[] c_ctype2 ;
+    
+    return ret ;
 }
 
 
@@ -775,6 +993,9 @@ std::string WcsHandler::SetFitsPlate(const std::string& header)  /* Current imag
     return new_header ;
 }
 
+/***********************************************
+ * SAO TDC TAN projection with higher order terms (platepos.c)
+ ***********************************************/
 
 //_________________________________________________
 /* GetPlate - Return plate fit coefficients from structure in arguments */
