@@ -24,8 +24,25 @@ Alternatively, if there is no 'configure' file, you can run the included autogen
 
 SOME BASIC FUNCTIONALITY 
 -
-Some of the benefits of the code is that it provides a few static methods that allow converting between known coordinate systems. For instance, you can convert between J2000 celestial (right ascension & declination) to Galactic longitude, latitude in the following way:
+**Coordinate Conversions**
 
+Some benefits are the few static methods that allow converting between known coordinate systems. For instance, you can convert between J2000 celestial (right ascension & declination) to Galactic longitude, latitude in the following way:
+```C++
+// Setup an ra,dec variable representing 
+// the position of the Crab nebula in degrees
+double x_coord(83.6333), y_coord(22.0145) ;
+std::cout << "Current (RA,Dec) = (" << x_coord << "," << y_coord << ")" << std::endl;
+
+// Now convert this position from RA,Dec to 
+// Galactic Longitude, Latitude
+WcsHandler::Celestial2Galactic(&x_coord, &y_coord) ;
+std::cout << "Current (G-lon,G-lat) = (" << x_coord << "," << y_coord << ")" << std::endl;
+```
+Similarly, there is a method ```WcsHandler::Galactic2Celestial``` that will do the reverse coordinate transformation.
+
+**Angular Separation**
+
+There is also a method (```WcsHandler::AngularSeparation_Deg``` or ```WcsHandler::AngularSeparation_Rad```) for calculating the angular separation between two positions (regardless of coordinate system).
 
 REPORTING ISSUES
 -
