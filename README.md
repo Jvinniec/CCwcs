@@ -2,25 +2,30 @@
 
 DESCRIPTION
 ---------------------
-A C++ wrapper library for wcstools. This library introduces a single class call 'WcsHandler' that should function as a c++11 compliant wrapper for the wcstools 'WorldCoor' structure. 
+A C++ wrapper library for wcstools. This library introduces a single class call 'WcsHandler' that should function as a c++11 compliant wrapper for the wcstools 'WorldCoor' structure.
 
 Obtaining the code
 ---------------------
 The code can be checked out from the git repository by submitting the follwoing on the command line:
-	
-	$ git clone https://github.com/Jvinniec/CCwcs.git
-
-This will create a directory called "CCwcs" in the directory that you execute the above command from.
+```
+$ git clone https://github.com/Jvinniec/CCwcs.git
+```
+This will create a directory called "CCwcs" in the directory that you execute the above command from and place all of the code for the repository in that directory.
 
 BUILDING
 ---------------------
 Building should be as simple as:
-
-	 $ ./configure [--with-wcs=/path/to/wcstools] [--prefix=/installation/directory]
-	 $ make
-	 $ make install
-
+```
+$ ./configure [--with-wcs=/path/to/wcstools] [--prefix=/installation/directory]
+$ make
+$ make install
+```
 Alternatively, if there is no 'configure' file, you can run the included autogen.sh script.
+
+SOME BASIC FUNCTIONALITY 
+-
+Some of the benefits of the code is that it provides a few static methods that allow converting between known coordinate systems. For instance, you can convert between J2000 celestial (right ascension & declination) to Galactic longitude, latitude in the following way:
+
 
 REPORTING ISSUES
 -
