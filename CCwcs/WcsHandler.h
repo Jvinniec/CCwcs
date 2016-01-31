@@ -6,8 +6,8 @@
 //  Copyright © 2016 JCardenzana. All rights reserved.
 //
 
-#ifndef CCwcs_WscHandler_h
-#define CCwcs_WscHandler_h
+#ifndef CCwcs_WcsHandler_h
+#define CCwcs_WcsHandler_h
 
 #include <stdio.h>
 #include <string>
